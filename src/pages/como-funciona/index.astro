@@ -1,0 +1,59 @@
+---
+import { seoHead } from '@/components/seo-head';
+import Header from '@/components/header.astro';
+import Footer from '@/components/footer.astro';
+import { site } from '@/config/site';
+
+const title = '¿Cómo funciona esta tienda que no vende nada? | CASI REAL';
+const description = 'Muy simple: en CASI REAL fabricamos ideas, no objetos. Explora inventos imposibles, personalízalos y compártelos. Sin pago, envío ni producto físico.';
+const url = new URL('/como-funciona/', site.url).href;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href={site.favicon} />
+    {seoHead({ title, description, url, image: site.ogImage })}
+    <style is:global>@import '/src/styles/global.css';</style>
+  </head>
+  <body>
+    <Header />
+    <section class="section">
+      <div class="container">
+        <h1>¿Cómo funciona esta tienda que no vende nada?</h1>
+        <p style="font-size:1.05rem; line-height:1.7;">
+          Muy simple: en CASI REAL fabricamos ideas, no objetos. Puedes explorar un catálogo de inventos imposibles, elegir cómo funcionaría cada uno y guardar tus favoritos en una bolsa imaginaria. Al finalizar no hay pago, envío ni producto físico: recibes un recuerdo digital para compartir o imprimir.
+        </p>
+        <div style="display:flex; flex-direction:column; gap:1.2rem; margin-top:1.6rem;">
+          <div style="display:flex; gap:1rem; align-items:flex-start;">
+            <span style="flex-shrink:0; font-weight:800; font-size:1.4rem; color:var(--accent);">1</span>
+            <div>
+              <p style="margin:0 0 0.2rem; font-weight:700;">Imagina</p>
+              <p style="margin:0; color:var(--muted); font-size:0.95rem;">Recorre el catálogo y lee la historia de cada invento. Ninguno es real.</p>
+            </div>
+          </div>
+          <div style="display:flex; gap:1rem; align-items:flex-start;">
+            <span style="flex-shrink:0; font-weight:800; font-size:1.4rem; color:var(--accent);">2</span>
+            <div>
+              <p style="margin:0 0 0.2rem; font-weight:700;">Personaliza</p>
+              <p style="margin:0; color:var(--muted); font-size:0.95rem;">Elige una versión de cada invento y descubre un resultado humorístico hecho para la ocasión.</p>
+            </div>
+          </div>
+          <div style="display:flex; gap:1rem; align-items:flex-start;">
+            <span style="flex-shrink:0; font-weight:800; font-size:1.4rem; color:var(--accent);">3</span>
+            <div>
+              <p style="margin:0 0 0.2rem; font-weight:700;">Comparte</p>
+              <p style="margin:0; color:var(--muted); font-size:0.95rem;">Agrégalo a tu bolsa imaginaria o envíalo como regalo ficticio con una tarjeta para imprimir.</p>
+            </div>
+          </div>
+        </div>
+        <p style="margin-top:1.6rem; font-size:0.9rem; color:var(--muted); border-top:1px solid var(--line); padding-top:1rem;">
+          ¿Se puede comprar? No. Pero sí puedes personalizarlo, agregarlo a tu bolsa imaginaria o enviárselo a alguien como regalo ficticio.
+        </p>
+      </div>
+    </section>
+    <Footer />
+    <script src="/scripts/bag-ui.js" defer></script>
+  </body>
+</html>

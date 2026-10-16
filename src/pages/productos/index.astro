@@ -1,0 +1,106 @@
+---
+import { seoHead } from '@/components/seo-head';
+import { productCard } from '@/components/product-card';
+import Header from '@/components/header.astro';
+import Footer from '@/components/footer.astro';
+import { site } from '@/config/site';
+import { loadProducts, Product } from '@/lib/products';
+
+const products = await loadProducts();
+const cats = [
+  { slug: 'trabajo', name: 'Trabajo' },
+  { slug: 'vida-cotidiana', name: 'Vida cotidiana' },
+  { slug: 'relaciones', name: 'Relaciones' },
+  { slug: 'aventuras', name: 'Aventuras' }
+];
+const q = (new URL(Astro.request.url).searchParams.get('q') ?? '').trim().toLowerCase();
+const cat = (new URL(Astro.request.url).searchParams.get('cat') ?? '').trim();
+
+let filtered = products;
+if (q) filtered = filtered.filter((p) => p.data.title.toLowerCase().includes(q) || p.data.shortDescription.toLowerCase().includes(q));
+if (cat) filtered = filtered.filter((p) => p.data.category === cat);
+
+const title = 'Todos los inventos | CASI REAL';
+const description = 'Catálogo de ocho inventos imposibles. Explora, personaliza y regala ideas ficticias. Nada aquí se vende.';
+const url = new URL('/productos/', site.url).href;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href={site.favicon} />
+    {seoHead({ title, description, url, image: site.ogImage })}
+    <style is:global>@import '/src/styles/global.css';</style>
+  </head>
+  <body>
+    <Header />
+    <section class="section">
+      <div class="container">
+        <h1>Todos los inventos imposibles</h1>
+        <p class="catalog-intro">Ocho ideas para problemas demasiado reales. Ninguno existe, ninguno se vende. Elige, personaliza y comparte.</p>
+
+        <div class="filter-row">
+          <input type="search" id="cat-search" placeholder="Buscar por nombre o descripción…" aria-label="Buscar productos" />
+          <button type="button" class="filter-btn active" data-cat="">Todos</button>
+          {cats.map((c) => (
+            <button type="button" class="filter-btn" data-cat={c.slug}>{c.name}</button>
+          ))}
+          <button type="button" class="filter-btn" id="reset-filters" style="margin-left:auto;">Restablecer</button>
+        </div>
+
+        <p class="result-count" id="result-count">{filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</p>
+
+        <div class="product-grid" id="product-grid">
+          {filtered.map((p) => productCard({ product: p }))}
+          {filtered.length === 0 && (
+            <div class="empty-state" id="empty-state">
+              <h2>Ni en este universo encontramos eso.</h2>
+              <p>Prueba con otra idea o quita los filtros.</p>
+              <button class="btn" id="reset-empty">Restablecer filtros</button>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+    <Footer />
+    <script src="/scripts/bag-ui.js" defer></script>
+    <script>
+      import { track } from '@/lib/analytics';
+      const inputs = document.getElementById('cat-search');
+      const cards = document.querySelectorAll('#product-grid article');
+      const countEl = document.getElementById('result-count');
+      const empty = document.getElementById('empty-state');
+      const catBtns = document.querySelectorAll('.filter-btn[data-cat]');
+      const resetBtn = document.getElementById('reset-filters');
+      const resetEmpty = document.getElementById('reset-empty');
+      let currentCat = '';
+      let currentQ = '';
+
+      function filter() {
+        let shown = 0;
+        cards.forEach((cardEl) => {
+          const card = cardEl as HTMLElement;
+          const title = card.dataset.title?.toLowerCase() ?? '';
+          const desc = card.dataset.desc?.toLowerCase() ?? '';
+          const c = card.dataset.cat ?? '';
+          const match = (!currentQ || title.includes(currentQ) || desc.includes(currentQ)) && (!currentCat || c === currentCat);
+          card.style.display = match ? '' : 'none';
+          if (match) shown++;
+        });
+        countEl.textContent = `${shown} resultado${shown !== 1 ? 's' : ''}`;
+        if (empty) empty.style.display = shown === 0 ? '' : 'none';
+      }
+
+      inputs.addEventListener('input', (e) => { currentQ = e.target.value.toLowerCase(); filter(); });
+      catBtns.forEach((b) => b.addEventListener('click', () => {
+        catBtns.forEach((x) => x.classList.toggle('active', x === b));
+        currentCat = b.dataset.cat ?? '';
+        filter();
+      }));
+      resetBtn.addEventListener('click', () => { catBtns.forEach((x) => x.classList.toggle('active', x.dataset.cat === '')); inputs.value = ''; currentCat = ''; currentQ = ''; filter(); });
+      resetEmpty.addEventListener('click', () => resetBtn.click());
+      filter();
+    </script>
+  </body>
+</html>

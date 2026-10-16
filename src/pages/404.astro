@@ -1,0 +1,35 @@
+---
+import { seoHead } from '@/components/seo-head';
+import Header from '@/components/header.astro';
+import Footer from '@/components/footer.astro';
+import { site } from '@/config/site';
+
+const title = 'No encontrado | CASI REAL';
+const description = 'Este invento todavía no existe. Ni siquiera aquí. Vuelve al catálogo de inventos imposibles.';
+const url = new URL('/404/', site.url).href;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href={site.favicon} />
+    {seoHead({ title, description, url, noindex: true })}
+    <style is:global>@import '/src/styles/global.css';</style>
+  </head>
+  <body>
+    <Header />
+    <section class="section">
+      <div class="container" style="text-align:center;">
+        <h1>Este invento todavía no existe. Ni siquiera aquí.</h1>
+        <p style="font-size:1.1rem; color:var(--muted); max-width:42ch; margin:0.8rem auto 1.6rem;">
+          La ruta que buscas no está en nuestro catálogo. Vuelve a lo improbable y explora los ocho inventos.
+        </p>
+        <a href="/productos/" class="btn">Volver a lo improbable</a>
+        <a href="/" class="btn btn-outline" style="margin-left:0.6rem;">Inicio</a>
+      </div>
+    </section>
+    <Footer />
+    <script src="/scripts/bag-ui.js" defer></script>
+  </body>
+</html>

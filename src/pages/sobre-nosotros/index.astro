@@ -1,0 +1,39 @@
+---
+import { seoHead } from '@/components/seo-head';
+import Header from '@/components/header.astro';
+import Footer from '@/components/footer.astro';
+import { site } from '@/config/site';
+
+const title = 'La realidad nos quedó chica | CASI REAL';
+const description = 'CASI REAL es un experimento independiente de diseño, humor e internet. Un laboratorio de experiencia de usuario y posicionamiento orgánico con contenido original.';
+const url = new URL('/sobre-nosotros/', site.url).href;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href={site.favicon} />
+    {seoHead({ title, description, url, image: site.ogImage })}
+    <style is:global>@import '/src/styles/global.css';</style>
+  </head>
+  <body>
+    <Header />
+    <section class="section">
+      <div class="container">
+        <h1>La realidad nos quedó chica</h1>
+        <p style="font-size:1.05rem; line-height:1.7; max-width:var(--reading-max);">
+          CASI REAL es un experimento independiente de diseño, humor e internet. Imaginamos respuestas imposibles para problemas demasiado cotidianos y las presentamos con el cariño de una tienda que se toma muy en serio algo que no existe. También es un laboratorio para explorar experiencia de usuario, desarrollo web y posicionamiento orgánico con contenido original.
+        </p>
+        <p style="margin-top:1.2rem; font-size:1.05rem; line-height:1.7; max-width:var(--reading-max);">
+          Todas las imágenes son ilustraciones conceptuales creadas para este proyecto. No hay equipos reales, ni patentes, ni equipos de fabricación, ni reseñas de usuarios. Cada página deja claro que se trata de ficción.
+        </p>
+        <p style="margin-top:1.6rem; font-size:0.95rem; color:var(--muted); max-width:42ch;">
+          Nombre de trabajo: CASI REAL (disponibilidad de marca y dominio no verificada).
+        </p>
+      </div>
+    </section>
+    <Footer />
+    <script src="/scripts/bag-ui.js" defer></script>
+  </body>
+</html>

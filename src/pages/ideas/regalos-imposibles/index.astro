@@ -1,0 +1,59 @@
+---
+import { seoHead } from '@/components/seo-head';
+import Header from '@/components/header.astro';
+import Footer from '@/components/footer.astro';
+import { site } from '@/config/site';
+
+const title = 'Regalos imposibles: ideas ficticias para compartir | CASI REAL';
+const description = '¿Un regalo que nadie podría comprar? Prueba ideas de regalos imposibles, personaliza una dedicatoria y comparte un certificado ficticio, gratis y sin pago.';
+const url = new URL('/ideas/regalos-imposibles/', site.url).href;
+const publishedTime = '2026-10-16T00:00:00Z';
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href={site.favicon} />
+    {seoHead({ title, description, url, image: site.ogImage, type: 'article', publishedTime })}
+    <style is:global>@import '/src/styles/global.css';</style>
+  </head>
+  <body>
+    <Header />
+    <section class="section editorial-article">
+      <div class="container">
+        <h1>Regalos imposibles para personas que ya lo tienen todo</h1>
+        <p style="font-size:1.05rem; color:var(--muted); margin-bottom:1.6rem;">
+          A veces no necesitas encontrar el objeto perfecto. Necesitas un regalo que diga: «Te conozco demasiado bien». Si una persona odia los lunes, puedes enviarle un dispositivo imaginario para congelar el reloj. Si siempre trabaja más de la cuenta, un clon ficticio que responda sus correos. No llegará ningún paquete, pero sí una historia que contar.
+        </p>
+        <p style="font-size:1.05rem;">
+          En CASI REAL los regalos son completamente virtuales y gratuitos. Escoges uno de nuestros inventos, seleccionas su versión, añades una dedicatoria opcional y compartes una tarjeta. No introducimos datos de pago ni prometemos entregas.
+        </p>
+
+        <h2>Para quien vive en reuniones</h2>
+        <p>
+          Regala el <a href="/productos/cancelador-de-reuniones/">Cancelador de Reuniones</a>: un objeto que traduce la frase «reunión de seguimiento» a «podríamos haberlo resuelto en cuatro líneas». Es una idea perfecta para un amigo del trabajo con sentido del humor.
+        </p>
+
+        <h2>Para quien necesita vacaciones</h2>
+        <p>
+          El <a href="/productos/teletransportador-de-vacaciones/">Teletransportador de Vacaciones</a> es ideal para quien empieza a planear su descanso en mitad de una videollamada. Entrega imaginaria: instantánea.
+        </p>
+
+        <h2>Para quien nunca sabe qué decir</h2>
+        <p>
+          Prueba el <a href="/productos/traductor-de-pensamientos/">Traductor de Pensamientos</a> o el <a href="/productos/borrador-de-conversaciones/">Borrador de Conversaciones</a>. El primero ayuda a expresar una idea imposible; el segundo a fantasear con borrar ese audio demasiado largo.
+        </p>
+
+        <h2>Un regalo sin gasto ni letra chica</h2>
+        <p>
+          No hay compra, envío, registro ni precio real. El resultado es una tarjeta digital para imprimir o compartir. Eso sí, si escribes una dedicatoria personal, cualquiera que reciba el enlace puede verla. Recomendamos mensajes ligeros y no incluir información privada.
+        </p>
+
+        <p style="margin-top:1.6rem;"><a href="/regalos-imposibles/" class="btn">Crea tu regalo imposible</a></p>
+      </div>
+    </section>
+    <Footer />
+    <script src="/scripts/bag-ui.js" defer></script>
+  </body>
+</html>

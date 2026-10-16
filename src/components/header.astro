@@ -1,0 +1,51 @@
+<header>
+  <div class="container">
+    <a href="/" class="wordmark" aria-label="CASI REAL — tienda ficticia de inventos imposibles">
+      <svg viewBox="0 0 64 64" fill="none" stroke="currentColor" stroke-width="3">
+        <rect x="14" y="14" width="36" height="36" rx="6" />
+        <rect x="18" y="18" width="36" height="36" rx="6" />
+      </svg>
+      <span>CASI REAL</span>
+    </a>
+
+    <nav>
+      <ul class="nav-list">
+        <li><a href="/productos/">Explorar</a></li>
+        <li><a href="/categorias/trabajo/">Categorías</a></li>
+        <li><a href="/regalos-imposibles/">Regalos imposibles</a></li>
+        <li><a href="/como-funciona/">Cómo funciona</a></li>
+        <li><a href="/bolsa/" class="bag-link">Bolsa <span class="bag-count" aria-hidden="true">0</span><span class="sr-only">artículos en tu bolsa imaginaria</span></a></li>
+      </ul>
+      <button class="menu-btn" aria-expanded="false" aria-controls="mobile-menu"><span></span><span></span><span></span></button>
+    </nav>
+    <div id="mobile-menu" class="mobile-menu">
+      <a href="/productos/">Explorar</a>
+      <a href="/categorias/trabajo/">Categorías</a>
+      <a href="/regalos-imposibles/">Regalos imposibles</a>
+      <a href="/como-funciona/">Cómo funciona</a>
+      <a href="/bolsa/">Bolsa imaginaria <span class="bag-count" aria-hidden="true">0</span></a>
+    </div>
+  </div>
+</header>
+<script>
+  import { loadBag, cartCount } from '@/lib/cart';
+  const btn = document.querySelector('.menu-btn');
+  const menu = document.getElementById('mobile-menu');
+  if (btn && menu) {
+    btn.addEventListener('click', () => {
+      const open = menu.classList.toggle('open');
+      btn.setAttribute('aria-expanded', String(open));
+    });
+    menu.querySelectorAll('a').forEach((a) => a.addEventListener('click', () => {
+      menu.classList.remove('open');
+      btn.setAttribute('aria-expanded', 'false');
+    }));
+  }
+  function updateCount() {
+    document.querySelectorAll('.bag-count').forEach((el) => {
+      el.textContent = String(cartCount(loadBag()));
+    });
+  }
+  updateCount();
+  window.addEventListener('casi-real:bag-changed', updateCount);
+</script>

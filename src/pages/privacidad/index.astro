@@ -1,0 +1,45 @@
+---
+import { seoHead } from '@/components/seo-head';
+import Header from '@/components/header.astro';
+import Footer from '@/components/footer.astro';
+import { site } from '@/config/site';
+
+const title = 'Privacidad | CASI REAL';
+const description = 'Cómo CASI REAL trata tu información. Solo se usan datos locales del navegador (bolsa y regalos) y analítica opcional. No se venden datos.';
+const url = new URL('/privacidad/', site.url).href;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href={site.favicon} />
+    {seoHead({ title, description, url })}
+    <style is:global>@import '/src/styles/global.css';</style>
+  </head>
+  <body>
+    <Header />
+    <section class="section">
+      <div class="container">
+        <h1>Privacidad</h1>
+        <p style="font-size:0.98rem; line-height:1.7; max-width:var(--reading-max);">
+          Este sitio no te pide nombre, correo, teléfono, dirección ni datos de pago. No crea cuentas ni vende productos, por lo que no recopila datos de clientes.
+        </p>
+        <h2>Almacenamiento local</h2>
+        <p style="font-size:0.98rem; line-height:1.7; max-width:var(--reading-max);">
+          Tu bolsa imaginaria y los borradores de regalo se guardan solo en tu navegador, mediante <code>localStorage</code> y <code>sessionStorage</code>. Contienen únicamente identificadores de producto, variantes y cantidades. Si compartes un enlace de regalo, la dedicatoria será visible para quien lo abra; no incluyas información privada.
+        </p>
+        <h2>Analítica opcional</h2>
+        <p style="font-size:0.98rem; line-height:1.7; max-width:var(--reading-max);">
+          La analítica (Google Analytics 4) está desactivada por defecto y solo se activa si el operador configura su ID y tú das tu consentimiento donde la ley lo requiera. El sitio funciona completamente sin ningún script de analítica.
+        </p>
+        <h2>Contacto y revisión</h2>
+        <p style="font-size:0.98rem; line-height:1.7; max-width:var(--reading-max);">
+          Esta política se revisa cuando el operador la actualice. No se muestran datos de contacto inventados. Para dudas sobre este sitio, escribe al operador una vez configurada una dirección real.
+        </p>
+      </div>
+    </section>
+    <Footer />
+    <script src="/scripts/bag-ui.js" defer></script>
+  </body>
+</html>

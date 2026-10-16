@@ -1,0 +1,67 @@
+---
+import { seoHead } from '@/components/seo-head';
+import Header from '@/components/header.astro';
+import Footer from '@/components/footer.astro';
+import { site } from '@/config/site';
+
+const title = 'Inventos imposibles: 8 ideas que ojalá existieran | CASI REAL';
+const description = 'Una colección de inventos imposibles para problemas reales: clones, máquinas de tiempo y otros objetos imaginarios. Inspírate y personaliza tus favoritos.';
+const url = new URL('/ideas/inventos-imposibles/', site.url).href;
+const publishedTime = '2026-10-16T00:00:00Z';
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href={site.favicon} />
+    {seoHead({ title, description, url, image: site.ogImage, type: 'article', publishedTime })}
+    <style is:global>@import '/src/styles/global.css';</style>
+  </head>
+  <body>
+    <Header />
+    <section class="section editorial-article">
+      <div class="container">
+        <h1>Inventos imposibles que solucionarían problemas demasiado reales</h1>
+        <p style="font-size:1.05rem; color:var(--muted); margin-bottom:1.6rem;">
+          Hay problemas que nadie se atreve a resolver porque la física, la lógica o el sentido común se interponen. Llegar tarde a una reunión, necesitar tres horas más de sueño, querer cambiar el clima justo antes de salir. Son situaciones normales con soluciones totalmente desproporcionadas. Esta colección imagina cómo serían esos productos si aparecieran mañana en el escaparate de una tienda de diseño.
+        </p>
+        <p style="font-size:1.05rem;">
+          La gracia está en tratarlos en serio: entender el problema, dibujar un objeto convincente y preguntarse quién lo querría. Ninguno existe ni está a la venta. Lo que sí existe es la posibilidad de personalizar una versión ficticia y enviársela a alguien.
+        </p>
+
+        <h2>Para recuperar el tiempo que no tenemos</h2>
+        <p>
+          El <a href="/productos/pausador-de-tiempo/">Pausador de Tiempo</a> propone negociar una tregua con el reloj. El <a href="/productos/recuperador-de-sueno/">Recuperador de Sueño</a> lleva esa negociación a la cama: porque a veces un domingo completo no alcanza para recuperarse de un martes.
+        </p>
+
+        <h2>Para sobrevivir a la vida laboral</h2>
+        <p>
+          Un <a href="/productos/clon-personal/">Clon Personal</a> podría llevar tu agenda, mientras el <a href="/productos/cancelador-de-reuniones/">Cancelador de Reuniones</a> filtraría ese mensaje que debió ser un correo. Son bromas sobre un problema serio: nuestros calendarios no siempre respetan la atención.
+        </p>
+
+        <h2>Para convivir con otras personas</h2>
+        <p>
+          Hay palabras que nunca debieron enviarse. El <a href="/productos/borrador-de-conversaciones/">Borrador de Conversaciones</a> fantasea con deshacer el daño; el <a href="/productos/traductor-de-pensamientos/">Traductor de Pensamientos</a> imagina lo contrario: decir exactamente lo que queremos decir.
+        </p>
+
+        <h2>Para cambiar de escenario</h2>
+        <p>
+          Un <a href="/productos/clima-de-bolsillo/">Clima de Bolsillo</a> transformaría el pronóstico en preferencia personal. Y el <a href="/productos/teletransportador-de-vacaciones/">Teletransportador de Vacaciones</a> eliminaría, al menos en nuestra imaginación, la fila para embarcar.
+        </p>
+
+        <h2>¿Por qué inventar cosas que no existen?</h2>
+        <p>
+          Porque exagerar una necesidad revela algo verdadero sobre ella. El diseño especulativo permite observar costumbres cotidianas desde un ángulo absurdo y pensar en alternativas. Aquí cada objeto se presenta como pieza de ficción: nunca como oferta real, patente o avance científico.
+        </p>
+
+        <p style="margin-top:1.6rem;">
+          <a href="/productos/" class="btn btn-outline">Explora los ocho inventos</a>
+          <a href="/regalos-imposibles/" class="btn">Elige un regalo imposible</a>
+        </p>
+      </div>
+    </section>
+    <Footer />
+    <script src="/scripts/bag-ui.js" defer></script>
+  </body>
+</html>

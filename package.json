@@ -1,0 +1,24 @@
+{
+  "name": "casi-real-mvp",
+  "type": "module",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Tienda ficticia de inventos imposibles — MVP estático en Astro",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "test": "vitest run"
+  },
+  "dependencies": {
+    "astro": "^4.16.0",
+    "@astrojs/sitemap": "^3.2.1"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.4",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}

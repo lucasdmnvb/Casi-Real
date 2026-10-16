@@ -1,0 +1,144 @@
+---
+import { seoHead } from '@/components/seo-head';
+import Header from '@/components/header.astro';
+import Footer from '@/components/footer.astro';
+import { loadBag, setQuantity, removeItem, clearBag, cartCount } from '@/lib/cart';
+import { getProductById, loadProducts, Product, site } from '@/lib/products';
+
+const products = await loadProducts();
+const bag = loadBag();
+const items = bag
+  .map((b) => {
+    const p = getProductById(products, b.productId);
+    return p ? { ...b, product: p } : null;
+  })
+  .filter(Boolean) as { productId: string; variantId: string; quantity: number; product: Product }[];
+
+const total = items.reduce((sum, i) => sum + i.product.data.imaginaryCredits * i.quantity, 0);
+
+const title = 'Bolsa imaginaria | CASI REAL';
+const description = 'Tu bolsa de inventos imposibles. Cambia cantidades, quita artículos o finaliza tu pedido imaginario. Sin pago real.';
+const url = new URL('/bolsa/', site.url).href;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href={site.favicon} />
+    {seoHead({ title, description, url, noindex: true })}
+    <style is:global>@import '/src/styles/global.css';</style>
+  </head>
+  <body>
+    <Header />
+    <section class="section">
+      <div class="container">
+        <h1>Tu bolsa imaginaria</h1>
+        {items.length === 0 ? (
+          <div class="bag-empty">
+            <h2>Tu bolsa está vacía. Qué nivel de autocontrol imaginario.</h2>
+            <p>Aún no has guardado ningún invento. El catálogo está a un clic.</p>
+            <a href="/productos/" class="btn">Explorar inventos</a>
+          </div>
+        ) : (
+          <>
+            <div class="bag-list">
+              {items.map((i) => (
+                <div class="bag-item" data-id={i.productId} data-v={i.variantId}>
+                  <div class="bag-item-info">
+                    <p class="bag-item-title">{i.product.data.title}</p>
+                    <p class="bag-item-variant">{i.variantId}</p>
+                    <p class="bag-item-credits">{i.product.data.imaginaryCredits.toLocaleString('es-ES')} créditos imaginarios × {i.quantity}</p>
+                  </div>
+                  <div class="qty-controls">
+                    <button type="button" class="qty-minus" aria-label="Restar unidad">−</button>
+                    <span>{i.quantity}</span>
+                    <button type="button" class="qty-plus" aria-label="Añadir unidad">+</button>
+                    <a class="remove-btn" href="#">Quitar</a>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div class="bag-summary" data-total="{total}">
+              <div class="row"><span>Subtotal (créditos imaginarios)</span><span>{total.toLocaleString('es-ES')}</span></div>
+              <div class="row total"><span>Total del pedido imaginario</span><span>{total.toLocaleString('es-ES')} créditos imaginarios</span></div>
+              <p class="credits-note">Los créditos imaginarios no son dinero real. No hay cargo, ni envío, ni producto físico.</p>
+            </div>
+            <div style="margin-top:1.2rem;">
+              <button class="btn btn-block" id="checkout-btn">Finalizar pedido imaginario</button>
+              <button class="btn btn-outline btn-block" id="clear-btn" style="margin-top:0.6rem;">Vaciar bolsa</button>
+            </div>
+          </>
+        )}
+      </div>
+    </section>
+    <Footer />
+    <script src="/scripts/bag-ui.js" defer></script>
+    <script>
+      const bagItems = document.querySelectorAll('.bag-item');
+      const checkout = document.getElementById('checkout-btn');
+      const clearBtn = document.getElementById('clear-btn');
+
+      function refresh() {
+        window.dispatchEvent(new CustomEvent('casi-real:bag-changed'));
+      }
+
+      bagItems.forEach((el) => {
+        const element = el as HTMLElement;
+        const id = element.dataset.id;
+        const v = element.dataset.v;
+        const minus = el.querySelector('.qty-minus') as HTMLButtonElement;
+        const plus = el.querySelector('.qty-plus') as HTMLButtonElement;
+        const qtyText = el.querySelector('span') as HTMLSpanElement;
+        const remove = el.querySelector('.remove-btn') as HTMLAnchorElement;
+
+        let qty = parseInt(qtyText.textContent, 10) || 1;
+
+        minus.addEventListener('click', () => {
+          if (qty <= 1) return;
+          qty--;
+          qtyText.textContent = String(qty);
+          setQuantity([], id, v, qty);
+          refresh();
+        });
+        plus.addEventListener('click', () => {
+          qty++;
+          qtyText.textContent = String(qty);
+          setQuantity([], id, v, qty);
+          refresh();
+        });
+        remove.addEventListener('click', (ev) => {
+          ev.preventDefault();
+          removeItem([], id, v);
+          el.remove();
+          refresh();
+          if (!document.querySelector('.bag-item')) {
+            location.href = '/bolsa/';
+          }
+        });
+      });
+
+      clearBtn?.addEventListener('click', () => {
+        clearBag();
+        location.href = '/bolsa/';
+      });
+
+      checkout?.addEventListener('click', () => {
+        if (!confirm('Esta es una simulación. No se cobrará ni enviará nada. ¿Continuar?')) return;
+        (window as any).casiRealTrack?.('imaginary_order_completed');
+        const payload = {
+          items: Array.from(bagItems).map((el) => ({
+            id: (el as HTMLElement).dataset.id,
+            v: (el as HTMLElement).dataset.v,
+            q: (el.querySelector('span') as HTMLSpanElement).textContent
+          })),
+          total: (document.querySelector('.bag-summary') as HTMLElement)?.dataset.total ?? '0'
+        };
+        sessionStorage.setItem('casi-real:receipt:v1', JSON.stringify(payload));
+        localStorage.removeItem('casi-real:bag:v1');
+        window.dispatchEvent(new CustomEvent('casi-real:bag-changed'));
+        location.href = '/pedido-imaginario/';
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,70 @@
+---
+import { seoHead } from '@/components/seo-head';
+import Header from '@/components/header.astro';
+import Footer from '@/components/footer.astro';
+import { getProductById, loadProducts } from '@/lib/products';
+import { parseGiftQuery } from '@/lib/gifts';
+import { site } from '@/config/site';
+
+const products = await loadProducts();
+const gift = parseGiftQuery(Astro.request.url.search);
+const base = site.url.replace(/\/$/, '');
+
+let product = null;
+let variant = null;
+let invalid = false;
+
+if (gift) {
+  product = getProductById(products, gift.productId);
+  variant = product?.data.configurator.options.find((o) => o.id === gift.variantId);
+}
+if (!gift || !product || !variant) invalid = true;
+
+const title = invalid ? 'Enlace no válido | CASI REAL' : 'Tu regalo imposible | CASI REAL';
+const description = invalid
+  ? 'Este enlace de regalo no es válido. Vuelve al catálogo y elige un invento imposible.'
+  : 'Descubre tu regalo imposible: una tarjeta ficticia para compartir o imprimir.';
+const url = new URL('/regalo/', site.url).href;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href={site.favicon} />
+    {seoHead({ title, description, url, image: site.ogImage, noindex: true })}
+    <style is:global>@import '/src/styles/global.css';</style>
+  </head>
+  <body>
+    <Header />
+    <section class="section">
+      <div class="container">
+        {invalid ? (
+          <>
+            <h1>Este invento todavía no existe. Ni siquiera aquí.</h1>
+            <p>El enlace de regalo no apunta a un producto o versión válida del catálogo.</p>
+            <a href="/productos/" class="btn">Ver todos los inventos</a>
+          </>
+        ) : (
+          <>
+            <h1>Un regalo imposible para {(gift!.to || 'alguien especial')}</h1>
+            <div class="gift-preview" style="margin:0 auto; max-width:420px; text-align:center;">
+              <img src={product!.data.image} alt={product!.data.imageAlt} width="600" height="600" loading="eager" decoding="async" />
+              <h3 style="margin:0.6rem 0 0.3rem;">{product!.data.title}</h3>
+              <p style="color:var(--muted); margin:0 0 0.8rem;">{variant!.result}</p>
+              {gift!.note && <p style="font-style:italic; margin:0 0 1rem;">«{gift!.note}»</p>}
+              <p style="margin:0 0 0.4rem; font-size:0.85rem; color:var(--ink);">Para: {gift!.to || '—'}</p>
+              <span style="font-size:0.75rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--fiction-fg); border-top:1px dashed #F3C9C5; padding-top:0.6rem; display:block;">Regalo imaginario / Sin valor comercial</span>
+            </div>
+            <p style="margin-top:1.2rem;"><a href={`/productos/${product.data.id}/`} class="btn btn-outline">Ver el producto original</a></p>
+            <p style="margin-top:0.6rem; font-size:0.9rem; color:var(--muted);">
+              ¿Quieres crear el tuyo propio? <a href="/regalos-imposibles/">Crea un regalo imposible</a>.
+            </p>
+          </>
+        )}
+      </div>
+    </section>
+    <Footer />
+    <script src="/scripts/bag-ui.js" defer></script>
+  </body>
+</html>

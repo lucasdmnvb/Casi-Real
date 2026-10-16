@@ -1,0 +1,60 @@
+---
+import { seoHead } from '@/components/seo-head';
+import Header from '@/components/header.astro';
+import Footer from '@/components/footer.astro';
+import { site } from '@/config/site';
+
+const receiptRaw = typeof sessionStorage !== 'undefined' ? sessionStorage.getItem('casi-real:receipt:v1') : null;
+let receipt = null;
+try { receipt = receiptRaw ? JSON.parse(receiptRaw) : null; } catch { receipt = null; }
+
+const title = receipt ? 'Pedido imaginario confirmado | CASI REAL' : 'Pedido imaginario | CASI REAL';
+const description = receipt ? 'Tu pedido simulado ha sido confirmado. No se ha cobrado ni enviado nada.' : 'No hay un pedido imaginario reciente.';
+const url = new URL('/pedido-imaginario/', site.url).href;
+const code = receipt ? 'CR-' + Math.floor(100000 + Math.random() * 900000) : null;
+---
+
+<html lang="es">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href={site.favicon} />
+    {seoHead({ title, description, url, noindex: true })}
+    <style is:global>@import '/src/styles/global.css';</style>
+  </head>
+  <body>
+    <Header />
+    <section class="section">
+      <div class="container">
+        {!receipt ? (
+          <div class="receipt">
+            <h1>No hay pedido imaginario reciente</h1>
+            <p>Agrega inventos a tu bolsa y finaliza el pedido para obtener un recuerdo digital.</p>
+            <a href="/bolsa/" class="btn">Ir a la bolsa imaginaria</a>
+            <a href="/productos/" class="btn btn-outline">Ver el catálogo</a>
+          </div>
+        ) : (
+          <>
+            <h1>Pedido imaginario confirmado</h1>
+            <p style="font-weight:700; color:var(--fiction-fg);">No has gastado ni un peso, euro o centavo.</p>
+            <div class="receipt" style="text-align:left; max-width:460px; margin:1.6rem auto 0; border:1px solid var(--line); background:var(--surface); padding:1.6rem; border-radius:var(--radius-lg);">
+              <p style="margin:0 0 0.4rem; font-size:0.9rem; color:var(--muted);">Comprobante de simulación</p>
+              <p style="margin:0 0 1rem; font-size:1.3rem; font-weight:800; letter-spacing:2px;">{code}</p>
+              <ul style="margin:0 0 1rem; padding-left:1.2rem; color:var(--ink);">
+                {receipt.items.map((it as { id: string; v: string; q: string }) => `<li>${it.q} × ${it.id} (${it.v})</li>`)}
+              </ul>
+              <p style="margin:0; font-weight:700;">Total: {receipt.total} créditos imaginarios</p>
+              <p style="margin-top:0.8rem; font-size:0.85rem; color:var(--muted);">Este documento no tiene valor comercial. No es una factura, ni un comprobante de pago, ni un envío.</p>
+            </div>
+            <div style="margin-top:1.4rem; text-align:center;">
+              <button class="btn btn-outline" onclick="window.print()">Imprimir certificado</button>
+              <a href="/productos/" class="btn" style="margin-left:0.6rem;">Seguir imaginando</a>
+            </div>
+          </>
+        )}
+      </div>
+    </section>
+    <Footer />
+    <script src="/scripts/bag-ui.js" defer></script>
+  </body>
+</html>
