@@ -14,6 +14,10 @@ benefits:
   - Pausas imaginarias sin interrupciones
   - Ideal para domingos cortos
   - Incluye modo «déjame pensar»
+sideEffects:
+  - Pausar demasiado podría hacerte llegar tarde al presente
+  - El tiempo pausado no devuelve el sueño perdido
+idealFor: Personas que necesitan cinco minutos más, cinco veces al día
 specs:
   - label: Pausa máxima
     value: Cinco minutos ficticios

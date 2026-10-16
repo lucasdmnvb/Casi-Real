@@ -4,13 +4,13 @@ import Header from '@/components/header.astro';
 import Footer from '@/components/footer.astro';
 import { site } from '@/config/site';
 
-const title = 'Inventos imposibles: 8 ideas que ojalá existieran | CASI REAL';
+const title = 'Inventos imposibles: 20 ideas que ojalá existieran | CASI REAL';
 const description = 'Una colección de inventos imposibles para problemas reales: clones, máquinas de tiempo y otros objetos imaginarios. Inspírate y personaliza tus favoritos.';
 const url = new URL('/ideas/inventos-imposibles/', site.url).href;
 const publishedTime = '2026-10-16T00:00:00Z';
 ---
 
-<html lang="es">
+<html lang={site.lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -56,7 +56,7 @@ const publishedTime = '2026-10-16T00:00:00Z';
         </p>
 
         <p style="margin-top:1.6rem;">
-          <a href="/productos/" class="btn btn-outline">Explora los ocho inventos</a>
+          <a href="/productos/" class="btn btn-outline">Explora los veinte inventos</a>
           <a href="/regalos-imposibles/" class="btn">Elige un regalo imposible</a>
         </p>
       </div>

@@ -4,28 +4,19 @@ import { productCard } from '@/components/product-card';
 import Header from '@/components/header.astro';
 import Footer from '@/components/footer.astro';
 import { site } from '@/config/site';
-import { loadProducts, Product } from '@/lib/products';
+import { loadProducts, productPath } from '@/lib/products';
+import { categories } from '@/config/categories';
 
 const products = await loadProducts();
-const cats = [
-  { slug: 'trabajo', name: 'Trabajo' },
-  { slug: 'vida-cotidiana', name: 'Vida cotidiana' },
-  { slug: 'relaciones', name: 'Relaciones' },
-  { slug: 'aventuras', name: 'Aventuras' }
-];
-const q = (new URL(Astro.request.url).searchParams.get('q') ?? '').trim().toLowerCase();
-const cat = (new URL(Astro.request.url).searchParams.get('cat') ?? '').trim();
+const slugs = products.map((p) => p.id);
 
-let filtered = products;
-if (q) filtered = filtered.filter((p) => p.data.title.toLowerCase().includes(q) || p.data.shortDescription.toLowerCase().includes(q));
-if (cat) filtered = filtered.filter((p) => p.data.category === cat);
-
-const title = 'Todos los inventos | CASI REAL';
-const description = 'Catálogo de ocho inventos imposibles. Explora, personaliza y regala ideas ficticias. Nada aquí se vende.';
+const title = 'Catálogo de inventos imposibles | CASI REAL';
+const description =
+  'Todos los inventos imposibles de CASI REAL. Explora, personaliza y regala ideas ficticias para problemas muy reales. Nada aquí se vende.';
 const url = new URL('/productos/', site.url).href;
 ---
 
-<html lang="es">
+<html lang={site.lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -35,72 +26,136 @@ const url = new URL('/productos/', site.url).href;
   </head>
   <body>
     <Header />
-    <section class="section">
+    <main class="section">
       <div class="container">
+        <p class="eyebrow">Catálogo completo</p>
         <h1>Todos los inventos imposibles</h1>
-        <p class="catalog-intro">Ocho ideas para problemas demasiado reales. Ninguno existe, ninguno se vende. Elige, personaliza y comparte.</p>
+        <p class="catalog-intro">
+          {products.length} ideas para problemas demasiado reales. Ninguno existe, ninguno se vende. Elige uno,
+          personalízalo y compártelo.
+        </p>
 
         <div class="filter-row">
-          <input type="search" id="cat-search" placeholder="Buscar por nombre o descripción…" aria-label="Buscar productos" />
-          <button type="button" class="filter-btn active" data-cat="">Todos</button>
-          {cats.map((c) => (
-            <button type="button" class="filter-btn" data-cat={c.slug}>{c.name}</button>
-          ))}
-          <button type="button" class="filter-btn" id="reset-filters" style="margin-left:auto;">Restablecer</button>
+          <div class="search-box">
+            <input type="search" id="cat-search" placeholder="Buscar por nombre o descripción…" aria-label="Buscar inventos" />
+          </div>
+          <select class="sort-select" id="cat-sort" aria-label="Ordenar inventos">
+            <option value="featured">Destacados primero</option>
+            <option value="az">Nombre (A–Z)</option>
+            <option value="za">Nombre (Z–A)</option>
+            <option value="credits-asc">Menos créditos</option>
+            <option value="credits-desc">Más créditos</option>
+          </select>
+          <div class="toolbar-right">
+            <button type="button" class="filter-btn active" data-cat="">Todos</button>
+            {categories.map((c) => (
+              <button type="button" class="filter-btn" data-cat={c.slug}>{c.name}</button>
+            ))}
+            <button type="button" class="btn btn-sm random-btn" id="random-btn" data-slugs={JSON.stringify(slugs)}>
+              Sorpréndeme
+            </button>
+          </div>
         </div>
 
-        <p class="result-count" id="result-count">{filtered.length} resultado{filtered.length !== 1 ? 's' : ''}</p>
+        <p class="result-count" id="result-count">{products.length} resultados</p>
 
         <div class="product-grid" id="product-grid">
-          {filtered.map((p) => productCard({ product: p }))}
-          {filtered.length === 0 && (
-            <div class="empty-state" id="empty-state">
-              <h2>Ni en este universo encontramos eso.</h2>
-              <p>Prueba con otra idea o quita los filtros.</p>
-              <button class="btn" id="reset-empty">Restablecer filtros</button>
-            </div>
-          )}
+          {products.map((p) => productCard({ product: p, source: 'catalog' }))}
+          <div class="empty-state" id="empty-state" hidden>
+            <h2>Ni en este universo encontramos eso.</h2>
+            <p>Prueba con otra idea o quita los filtros.</p>
+            <button class="btn reset-btn" id="reset-empty" type="button">Restablecer filtros</button>
+          </div>
         </div>
       </div>
-    </section>
+    </main>
     <Footer />
     <script src="/scripts/bag-ui.js" defer></script>
     <script>
       import { track } from '@/lib/analytics';
-      const inputs = document.getElementById('cat-search');
-      const cards = document.querySelectorAll('#product-grid article');
-      const countEl = document.getElementById('result-count');
-      const empty = document.getElementById('empty-state');
-      const catBtns = document.querySelectorAll('.filter-btn[data-cat]');
-      const resetBtn = document.getElementById('reset-filters');
-      const resetEmpty = document.getElementById('reset-empty');
+
+      const grid = document.getElementById('product-grid')!;
+      const cards = Array.from(grid.querySelectorAll('#product-grid > article')) as HTMLElement[];
+      const search = document.getElementById('cat-search') as HTMLInputElement;
+      const sortSel = document.getElementById('cat-sort') as HTMLSelectElement;
+      const countEl = document.getElementById('result-count')!;
+      const empty = document.getElementById('empty-state')!;
+      const catBtns = Array.from(document.querySelectorAll('.filter-btn[data-cat]')) as HTMLButtonElement[];
+      const randomBtn = document.getElementById('random-btn') as HTMLButtonElement;
+
       let currentCat = '';
       let currentQ = '';
 
-      function filter() {
+      function apply() {
         let shown = 0;
-        cards.forEach((cardEl) => {
-          const card = cardEl as HTMLElement;
-          const title = card.dataset.title?.toLowerCase() ?? '';
-          const desc = card.dataset.desc?.toLowerCase() ?? '';
-          const c = card.dataset.cat ?? '';
+        cards.forEach((card) => {
+          const title = (card.dataset.title || '').toLowerCase();
+          const desc = (card.dataset.desc || '').toLowerCase();
+          const c = card.dataset.cat || '';
           const match = (!currentQ || title.includes(currentQ) || desc.includes(currentQ)) && (!currentCat || c === currentCat);
           card.style.display = match ? '' : 'none';
           if (match) shown++;
         });
         countEl.textContent = `${shown} resultado${shown !== 1 ? 's' : ''}`;
-        if (empty) empty.style.display = shown === 0 ? '' : 'none';
+        empty.hidden = shown !== 0;
       }
 
-      inputs.addEventListener('input', (e) => { currentQ = e.target.value.toLowerCase(); filter(); });
+      function sortCards() {
+        const mode = sortSel.value;
+        const sorted = [...cards].sort((a, b) => {
+          const ta = a.dataset.title || '';
+          const tb = b.dataset.title || '';
+          const ca = (a.dataset.featured === '1') ? 1 : 0;
+          const cb = (b.dataset.featured === '1') ? 1 : 0;
+          switch (mode) {
+            case 'az': return ta.localeCompare(tb, 'es');
+            case 'za': return tb.localeCompare(ta, 'es');
+            default: return cb - ca || ta.localeCompare(tb, 'es');
+          }
+        });
+        sorted.forEach((c) => grid.appendChild(c));
+      }
+
+      let searchTimer: number | undefined;
+      search.addEventListener('input', () => {
+        currentQ = search.value.trim().toLowerCase();
+        apply();
+        window.clearTimeout(searchTimer);
+        if (currentQ.length >= 3) {
+          searchTimer = window.setTimeout(() => track('catalog_search', { query_length: currentQ.length }), 600);
+        }
+      });
+
       catBtns.forEach((b) => b.addEventListener('click', () => {
         catBtns.forEach((x) => x.classList.toggle('active', x === b));
-        currentCat = b.dataset.cat ?? '';
-        filter();
+        currentCat = b.dataset.cat || '';
+        apply();
+        track('category_filter', { category: currentCat || 'todos' });
       }));
-      resetBtn.addEventListener('click', () => { catBtns.forEach((x) => x.classList.toggle('active', x.dataset.cat === '')); inputs.value = ''; currentCat = ''; currentQ = ''; filter(); });
-      resetEmpty.addEventListener('click', () => resetBtn.click());
-      filter();
+
+      document.getElementById('reset-empty')?.addEventListener('click', () => {
+        search.value = '';
+        currentQ = '';
+        currentCat = '';
+        catBtns.forEach((x) => x.classList.toggle('active', x.dataset.cat === ''));
+        apply();
+      });
+
+      sortSel.addEventListener('change', () => { sortCards(); apply(); });
+
+      randomBtn.addEventListener('click', () => {
+        const visible = cards.filter((c) => c.style.display !== 'none');
+        const pool = visible.length ? visible : cards;
+        if (!pool.length) return;
+        const pick = pool[Math.floor(Math.random() * pool.length)];
+        const slug = pick.dataset.id || '';
+        track('random_product_click', { product: slug });
+        const link = pick.querySelector('a[data-card-link]') as HTMLAnchorElement | null;
+        window.location.href = link?.href || `/productos/${encodeURIComponent(slug)}/`;
+      });
+
+      sortCards();
+      apply();
     </script>
   </body>
 </html>

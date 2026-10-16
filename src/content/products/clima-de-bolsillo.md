@@ -14,6 +14,10 @@ benefits:
   - Sol portátil para panoramas
   - Lluvia de película a voluntad
   - Brisa de paseo junto al mar
+sideEffects:
+  - Podría crear contradicciones meteorológicas con tu vecino
+  - El paraguas seguirá siendo necesario, por si acaso
+idealFor: Personas cuyo plan depende de que no llueva
 specs:
   - label: Alcance
     value: Un metro de optimismo

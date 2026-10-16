@@ -2,14 +2,29 @@
 import { seoHead } from '@/components/seo-head';
 import Header from '@/components/header.astro';
 import Footer from '@/components/footer.astro';
+import { loadProducts, productPath } from '@/lib/products';
 import { site } from '@/config/site';
 
 const title = 'Regala algo imposible | CASI REAL';
 const description = 'Crea un regalo imposible: elige un invento, añade una dedicatoria y comparte una tarjeta ficticia. Gratis, sin pago, sin envío.';
 const url = new URL('/regalos-imposibles/', site.url).href;
+
+const all = await loadProducts();
+const giftProducts = [...all]
+  .sort((a, b) => {
+    if (a.data.featured !== b.data.featured) return a.data.featured ? -1 : 1;
+    return a.data.title.localeCompare(b.data.title, 'es');
+  })
+  .map((p) => ({
+    id: p.id,
+    title: p.data.title,
+    credits: p.data.imaginaryCredits,
+    image: p.data.image,
+    variantId: p.data.configurator.options[0]?.id ?? ''
+  }));
 ---
 
-<html lang="es">
+<html lang={site.lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -29,46 +44,13 @@ const url = new URL('/regalos-imposibles/', site.url).href;
           <div class="gift-step">
             <h3>1. Elige el regalo</h3>
             <div class="gift-options" role="radiogroup" aria-label="Producto">
-              <button type="button" class="gift-option" data-p="clon-personal" data-v="reuniones" aria-pressed="false">
-                <img src="/images/products/clon-personal.svg" alt="" loading="lazy" width="600" height="600" />
-                <span class="gift-option-name">Clon Personal 2.0</span>
-                <span class="gift-option-credits">1.290 créditos imaginarios</span>
-              </button>
-              <button type="button" class="gift-option" data-p="cancelador-de-reuniones" data-v="alineamiento" aria-pressed="false">
-                <img src="/images/products/cancelador-de-reuniones.svg" alt="" loading="lazy" width="600" height="600" />
-                <span class="gift-option-name">Cancelador de Reuniones Pro</span>
-                <span class="gift-option-credits">640 créditos imaginarios</span>
-              </button>
-              <button type="button" class="gift-option" data-p="borrador-de-conversaciones" data-v="audio" aria-pressed="false">
-                <img src="/images/products/borrador-de-conversaciones.svg" alt="" loading="lazy" width="600" height="600" />
-                <span class="gift-option-name">Borrador de Conversaciones</span>
-                <span class="gift-option-credits">560 créditos imaginarios</span>
-              </button>
-              <button type="button" class="gift-option" data-p="traductor-de-pensamientos" data-v="planes" aria-pressed="false">
-                <img src="/images/products/traductor-de-pensamientos.svg" alt="" loading="lazy" width="600" height="600" />
-                <span class="gift-option-name">Traductor de Pensamientos</span>
-                <span class="gift-option-credits">970 créditos imaginarios</span>
-              </button>
-              <button type="button" class="gift-option" data-p="pausador-de-tiempo" data-v="despertador" aria-pressed="false">
-                <img src="/images/products/pausador-de-tiempo.svg" alt="" loading="lazy" width="600" height="600" />
-                <span class="gift-option-name">Pausador de Tiempo Pocket</span>
-                <span class="gift-option-credits">1.120 créditos imaginarios</span>
-              </button>
-              <button type="button" class="gift-option" data-p="recuperador-de-sueno" data-v="siesta" aria-pressed="false">
-                <img src="/images/products/recuperador-de-sueno.svg" alt="" loading="lazy" width="600" height="600" />
-                <span class="gift-option-name">Recuperador de Sueño 3000</span>
-                <span class="gift-option-credits">880 créditos imaginarios</span>
-              </button>
-              <button type="button" class="gift-option" data-p="clima-de-bolsillo" data-v="sol" aria-pressed="false">
-                <img src="/images/products/clima-de-bolsillo.svg" alt="" loading="lazy" width="600" height="600" />
-                <span class="gift-option-name">Clima de Bolsillo Mini</span>
-                <span class="gift-option-credits">730 créditos imaginarios</span>
-              </button>
-              <button type="button" class="gift-option" data-p="teletransportador-de-vacaciones" data-v="playa" aria-pressed="false">
-                <img src="/images/products/teletransportador-de-vacaciones.svg" alt="" loading="lazy" width="600" height="600" />
-                <span class="gift-option-name">Teletransportador de Vacaciones</span>
-                <span class="gift-option-credits">1.880 créditos imaginarios</span>
-              </button>
+              {giftProducts.map((p) => (
+                <button type="button" class="gift-option" data-p={p.id} data-v={p.variantId} data-name={p.title} data-image={p.image} aria-pressed="false">
+                  <img src={p.image} alt="" loading="lazy" width="600" height="600" />
+                  <span class="gift-option-name">{p.title}</span>
+                  <span class="gift-option-credits">{p.credits.toLocaleString('es-CL')} créditos imaginarios</span>
+                </button>
+              ))}
             </div>
           </div>
           <div class="gift-step">
@@ -77,6 +59,11 @@ const url = new URL('/regalos-imposibles/', site.url).href;
               <label for="gift-to">Para</label>
               <input id="gift-to" type="text" placeholder="Nombre de la persona" maxlength="32" />
               <span class="char-count" id="gift-to-count">0 / 32</span>
+            </div>
+            <div class="form-group">
+              <label for="gift-from">De parte de</label>
+              <input id="gift-from" type="text" placeholder="Tu nombre (opcional)" maxlength="32" />
+              <span class="char-count" id="gift-from-count">0 / 32</span>
             </div>
             <div class="form-group">
               <label for="gift-note">Mensaje</label>
@@ -95,6 +82,7 @@ const url = new URL('/regalos-imposibles/', site.url).href;
             </div>
             <div style="display:flex; flex-direction:column; gap:0.7rem; margin-top:1rem;">
               <button type="button" class="btn" id="copy-btn" hidden>Copiar enlace</button>
+              <button type="button" class="btn btn-ghost" id="whatsapp-btn" hidden>Compartir por WhatsApp</button>
               <button type="button" class="btn btn-ghost" id="share-btn" hidden>Compartir regalo</button>
               <a class="btn btn-ghost" id="print-btn" hidden target="_blank" rel="noopener">Imprimir certificado</a>
             </div>
@@ -107,97 +95,132 @@ const url = new URL('/regalos-imposibles/', site.url).href;
     <script src="/scripts/bag-ui.js" defer></script>
     <script>
       import { buildGiftUrl } from '@/lib/gifts';
-      const form = document.getElementById('gift-form');
+      import { track } from '@/lib/analytics';
+
+      const form = document.getElementById('gift-form') as HTMLFormElement;
       const options = form.querySelectorAll('.gift-option');
       const preview = document.getElementById('gift-preview');
-      const previewImg = document.getElementById('gift-preview-img');
+      const previewImg = document.getElementById('gift-preview-img') as HTMLImageElement;
       const previewName = document.getElementById('gift-preview-name');
       const previewBody = document.getElementById('gift-preview-body');
-      const copyBtn = document.getElementById('copy-btn');
-      const shareBtn = document.getElementById('share-btn');
-      const printBtn = document.getElementById('print-btn');
+      const copyBtn = document.getElementById('copy-btn') as HTMLButtonElement;
+      const shareBtn = document.getElementById('share-btn') as HTMLButtonElement;
+      const whatsappBtn = document.getElementById('whatsapp-btn') as HTMLAnchorElement;
+      const printBtn = document.getElementById('print-btn') as HTMLAnchorElement;
       const status = document.getElementById('gift-status');
-      const toInput = document.getElementById('gift-to');
-      const noteInput = document.getElementById('gift-note');
+      const toInput = document.getElementById('gift-to') as HTMLInputElement;
+      const fromInput = document.getElementById('gift-from') as HTMLInputElement;
+      const noteInput = document.getElementById('gift-note') as HTMLTextAreaElement;
       const toCount = document.getElementById('gift-to-count');
+      const fromCount = document.getElementById('gift-from-count');
       const noteCount = document.getElementById('gift-note-count');
 
-      const names = {
-        'clon-personal': 'Clon Personal 2.0',
-        'cancelador-de-reuniones': 'Cancelador de Reuniones Pro',
-        'borrador-de-conversaciones': 'Borrador de Conversaciones',
-        'traductor-de-pensamientos': 'Traductor de Pensamientos',
-        'pausador-de-tiempo': 'Pausador de Tiempo Pocket',
-        'recuperador-de-sueno': 'Recuperador de Sueño 3000',
-        'clima-de-bolsillo': 'Clima de Bolsillo Mini',
-        'teletransportador-de-vacaciones': 'Teletransportador de Vacaciones'
-      };
+      const first = options[0] as HTMLElement | undefined;
+      const sel = { p: first?.dataset.p ?? '', v: first?.dataset.v ?? '', to: '', from: '', note: '', name: first?.dataset.name ?? '' };
 
-      let sel = { p: 'clon-personal', v: 'reuniones', to: '', note: '' };
-
-      function esc(text) {
+      function esc(text: string) {
         const d = document.createElement('div');
         d.textContent = text;
         return d.innerHTML;
       }
 
       function refresh() {
-      options.forEach((o) => {
-        const el = o as HTMLElement;
-        el.classList.toggle('selected', el.dataset.p === sel.p && el.dataset.v === sel.v);
-        el.setAttribute('aria-pressed', String(el.dataset.p === sel.p && el.dataset.v === sel.v));
-      });
-        preview.hidden = false;
+        options.forEach((o) => {
+          const el = o as HTMLElement;
+          const active = el.dataset.p === sel.p && el.dataset.v === sel.v;
+          el.classList.toggle('selected', active);
+          el.setAttribute('aria-pressed', String(active));
+        });
+        preview!.hidden = false;
         previewImg.src = `/images/products/${sel.p}.svg`;
-        previewImg.alt = names[sel.p] || '';
-        previewName.textContent = names[sel.p] || 'Invento imposible';
-        previewBody.innerHTML = sel.note ? esc(sel.note) : 'Sin valor comercial. Tarjeta de ficción.';
-        const url = buildGiftUrl(sel);
+        previewImg.alt = sel.name;
+        previewName!.textContent = sel.name || 'Invento imposible';
+        previewBody!.innerHTML = sel.note ? esc(sel.note) : 'Sin valor comercial. Tarjeta de ficción.';
         copyBtn.hidden = false;
         shareBtn.hidden = false;
+        whatsappBtn.hidden = false;
         printBtn.hidden = false;
-        printBtn.href = '/regalo/?p=' + encodeURIComponent(sel.p) + '&v=' + encodeURIComponent(sel.v) + (sel.to ? '&to=' + encodeURIComponent(sel.to) : '') + (sel.note ? '&note=' + encodeURIComponent(sel.note) : '');
-        status.textContent = 'Vista previa actualizada. Copia el enlace o imprime el certificado.';
+        const query = `p=${encodeURIComponent(sel.p)}&v=${encodeURIComponent(sel.v)}`
+          + (sel.to ? `&to=${encodeURIComponent(sel.to)}` : '')
+          + (sel.from ? `&from=${encodeURIComponent(sel.from)}` : '')
+          + (sel.note ? `&note=${encodeURIComponent(sel.note)}` : '');
+        printBtn.href = `/regalo/?${query}`;
+        status!.textContent = 'Vista previa lista. Copia el enlace o comparte el regalo.';
       }
 
-      options.forEach((o) => o.addEventListener('click', () => {
-        const el = o as HTMLElement;
-        sel.p = el.dataset.p;
-        sel.v = el.dataset.v;
-        refresh();
-      }));
+      options.forEach((o) =>
+        o.addEventListener('click', () => {
+          const el = o as HTMLElement;
+          sel.p = el.dataset.p ?? '';
+          sel.v = el.dataset.v ?? '';
+          sel.name = el.dataset.name ?? '';
+          track('gift_created', { product: sel.p, variant: sel.v });
+          refresh();
+        })
+      );
 
-      toInput.addEventListener('input', (e) => { sel.to = e.target.value.trim(); toCount.textContent = sel.to.length + ' / 32'; refresh(); });
-      noteInput.addEventListener('input', (e) => { sel.note = e.target.value.trim(); noteCount.textContent = sel.note.length + ' / 120'; refresh(); });
+      toInput.addEventListener('input', () => {
+        sel.to = toInput.value.trim().slice(0, 32);
+        toCount!.textContent = `${sel.to.length} / 32`;
+        refresh();
+      });
+      fromInput.addEventListener('input', () => {
+        sel.from = fromInput.value.trim().slice(0, 32);
+        fromCount!.textContent = `${sel.from.length} / 32`;
+        refresh();
+      });
+      noteInput.addEventListener('input', () => {
+        sel.note = noteInput.value.trim().slice(0, 120);
+        noteCount!.textContent = `${sel.note.length} / 120`;
+        refresh();
+      });
 
       copyBtn.addEventListener('click', async () => {
         const url = buildGiftUrl(sel);
         try {
           await navigator.clipboard.writeText(url);
-          status.textContent = 'Enlace copiado. Que la imaginación haga el resto.';
+          status!.textContent = 'Enlace copiado. Que la imaginación haga el resto.';
+          track('gift_shared', { method: 'copy', product: sel.p });
         } catch {
-          status.textContent = 'No pudimos copiar automáticamente. Selecciona y copia el enlace de abajo.';
+          status!.textContent = 'No pudimos copiar automáticamente. Selecciona y copia el enlace de abajo.';
           const field = document.createElement('input');
           field.value = url;
           field.setAttribute('aria-label', 'Enlace del regalo');
           form.appendChild(field);
           field.select();
-          try { document.execCommand('copy'); } catch {}
+          try {
+            document.execCommand('copy');
+          } catch {}
           field.remove();
         }
+      });
+
+      whatsappBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        const url = buildGiftUrl(sel);
+        const text = sel.note
+          ? `${sel.note} — Te regalo ${sel.name} (imaginario).`
+          : `Te regalo ${sel.name}, un invento imposible de CASI REAL.`;
+        track('gift_shared', { method: 'whatsapp', product: sel.p });
+        window.open(`https://wa.me/?text=${encodeURIComponent(`${text} ${url}`)}`, '_blank', 'noopener');
       });
 
       shareBtn.addEventListener('click', async () => {
         const url = buildGiftUrl(sel);
         if (navigator.share) {
           try {
-            await navigator.share({ title: 'Un regalo imposible de CASI REAL', text: sel.note ? `${sel.note} — ${names[sel.p]}` : `Te regalo ${names[sel.p]} (imaginario).`, url });
-            status.textContent = 'Compartido.';
+            await navigator.share({
+              title: 'Un regalo imposible de CASI REAL',
+              text: sel.note ? `${sel.note} — Te regalo ${sel.name} (imaginario).` : `Te regalo ${sel.name}, un invento imposible de CASI REAL.`,
+              url
+            });
+            status!.textContent = 'Compartido.';
+            track('gift_shared', { method: 'native', product: sel.p });
           } catch {
-            status.textContent = 'No se pudo compartir. Copia el enlace de arriba.';
+            status!.textContent = 'No se pudo compartir. Copia el enlace de arriba.';
           }
         } else {
-          status.textContent = 'Copia el enlace de arriba y envíaselo a quien quieras.';
+          status!.textContent = 'Copia el enlace de arriba y envíaselo a quien quieras.';
         }
       });
 

@@ -8,14 +8,6 @@ const NOINDEX_PATHS = ['/bolsa/', '/regalo/', '/pedido-imaginario/', '/404/'];
 const staticRoutes = [
   '/',
   '/productos/',
-  '/productos/clon-personal/',
-  '/productos/cancelador-de-reuniones/',
-  '/productos/clima-de-bolsillo/',
-  '/productos/pausador-de-tiempo/',
-  '/productos/recuperador-de-sueno/',
-  '/productos/teletransportador-de-vacaciones/',
-  '/productos/traductor-de-pensamientos/',
-  '/productos/borrador-de-conversaciones/',
   '/categorias/trabajo/',
   '/categorias/vida-cotidiana/',
   '/categorias/relaciones/',
@@ -32,7 +24,7 @@ const staticRoutes = [
 export async function GET() {
   const products = await loadProducts();
   const productRoutes = products.map((p) => `/productos/${p.id}/`);
-  const all = [...staticRoutes, ...productRoutes].filter((r) => !NOINDEX_PATHS.includes(r));
+  const all = Array.from(new Set([...staticRoutes, ...productRoutes])).filter((r) => !NOINDEX_PATHS.includes(r));
 
   const origin = site.url.replace(/\/$/, '');
   const now = new Date().toISOString();

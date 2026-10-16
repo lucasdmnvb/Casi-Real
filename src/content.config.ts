@@ -14,6 +14,8 @@ const Product = z.object({
   eyebrow: z.string(),
   hook: z.string(),
   benefits: z.array(z.string()).min(3),
+  sideEffects: z.array(z.string()).default([]),
+  idealFor: z.string().default(''),
   specs: z
     .array(
       z.object({ label: z.string(), value: z.string() })

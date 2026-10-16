@@ -14,6 +14,10 @@ benefits:
   - Saltarse el aeropuerto completo
   - Escapadas sin calendario compartido
   - Regreso opcional en una realidad alternativa
+sideEffects:
+  - Podrías olvidar contarle a alguien a dónde fuiste
+  - El regreso a la oficina sigue siendo, por desgracia, obligatorio
+idealFor: Personas que necesitan desaparecer un rato
 specs:
   - label: Velocidad
     value: Antes de que termine la reunión

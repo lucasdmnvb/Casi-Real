@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="600" height="600" viewBox="0 0 600 600" role="img" aria-label="Modo Avión Social: disco con icono de avión que desconecta toda conversación ajena">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#F5F5EF"/><stop offset="100%" stop-color="#EDECE2"/></linearGradient>
+    <linearGradient id="dev" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#FFFFFF"/><stop offset="100%" stop-color="#E6E2EC"/></linearGradient>
+    <filter id="sh" x="-20%" y="-20%" width="140%" height="140%"><feGaussianBlur in="SourceAlpha" stdDeviation="14"/><feOffset dy="10"/><feComponentTransfer><feFuncA type="linear" slope="0.12"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <rect width="600" height="600" fill="url(#bg)"/>
+  <ellipse cx="300" cy="474" rx="150" ry="26" fill="#6D4E8C" opacity="0.10"/>
+  <g filter="url(#sh)">
+    <circle cx="300" cy="296" r="150" fill="url(#dev)" stroke="#C6C2CE" stroke-width="2.5"/>
+    <circle cx="300" cy="296" r="112" fill="none" stroke="#D6D3DE" stroke-width="3"/>
+    <path d="M300 214 l26 70 l64 10 l-48 44 l14 66 l-56 -34 l-56 34 l14 -66 l-48 -44 l64 -10 z" fill="#6D4E8C" opacity="0.16"/>
+    <path d="M300 232 l14 82 l-30 60 l-24 14 l40 -54 z" fill="#6D4E8C"/>
+    <path d="M300 232 l-92 30 l12 20 l80 -30 z" fill="#6D4E8C"/>
+    <path d="M300 232 l92 30 l-12 20 l-80 -30 z" fill="#6D4E8C"/>
+    <circle cx="300" cy="296" r="14" fill="#FFFFFF" stroke="#6D4E8C" stroke-width="4"/>
+  </g>
+  <text x="300" y="562" text-anchor="middle" fill="#6D4E8C" font-family="Georgia, serif" font-size="15" letter-spacing="0.6">Arte conceptual — no es un prototipo funcional</text>
+</svg>

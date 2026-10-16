@@ -4,16 +4,18 @@ export const site = {
   transparency: 'Una tienda ficticia. Productos inventados. Diversión real.',
   shortDescription:
     'Explora inventos imposibles como si fueran productos reales. Personaliza objetos absurdos, arma un pedido imaginario y regálale una idea a alguien.',
-  url: (import.meta.env.SITE_URL as string | undefined) || 'https://example.invalid',
-  indexable: (import.meta.env.PUBLIC_INDEXABLE as string | undefined) === 'true',
+  url: ((import.meta.env.SITE_URL as string | undefined) || 'https://casi-real.vercel.app').replace(/\/$/, ''),
+  indexable: (import.meta.env.PUBLIC_INDEXABLE as string | undefined) !== 'false',
   ga4Id: (import.meta.env.PUBLIC_GA4_ID as string | undefined) || '',
   ogImage: '/images/og/casi-real-share.svg',
   favicon: '/images/favicon.svg',
+  lang: 'es-CL',
+  locale: 'es_CL',
   defaultMetadata: {
     title: 'CASI REAL | Tienda ficticia de inventos imposibles',
     description:
       'Explora inventos imposibles como si fueran productos reales. Personaliza objetos absurdos, arma un pedido imaginario y regálale una idea a alguien.',
-    lang: 'es',
+    lang: 'es-CL',
     type: 'website'
   },
   localStorageKeys: {

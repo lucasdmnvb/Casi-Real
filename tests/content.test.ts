@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { readFileSync, existsSync } from 'node:fs';
+import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join } from 'node:path';
 import { z } from 'zod';
 import matter from 'gray-matter';
@@ -19,6 +19,8 @@ const Product = z.object({
   eyebrow: z.string(),
   hook: z.string(),
   benefits: z.array(z.string()).min(3),
+  sideEffects: z.array(z.string()).min(1),
+  idealFor: z.string().min(1),
   specs: z.array(z.object({ label: z.string(), value: z.string() })).min(3),
   configurator: z.object({
     prompt: z.string(),
@@ -35,25 +37,25 @@ const Product = z.object({
   fictional: z.literal(true)
 });
 
-const files = ['borrador-de-conversaciones', 'cancelador-de-reuniones', 'clima-de-bolsillo', 'clon-personal', 'pausador-de-tiempo', 'recuperador-de-sueno', 'teletransportador-de-vacaciones', 'traductor-de-pensamientos'];
+const files = readdirSync(dir)
+  .filter((f) => f.endsWith('.md'))
+  .map((f) => f.replace(/\.md$/, ''))
+  .sort();
+
+const load = (f: string) => Product.parse(matter(readFileSync(join(dir, `${f}.md`), 'utf8')).data);
 
 describe('content validation', () => {
-  it('loads all 8 authored products with valid frontmatter', () => {
-    const products = files.map((f) => {
-      const raw = readFileSync(join(dir, `${f}.md`), 'utf8');
-      const { data } = matter(raw);
-      return Product.parse(data);
-    });
-    expect(products).toHaveLength(8);
+  it('loads every authored product with valid frontmatter', () => {
+    expect(files.length).toBeGreaterThanOrEqual(20);
+    const products = files.map(load);
     const ids = products.map((p) => p.title);
-    expect(new Set(ids).size).toBe(8);
+    expect(new Set(ids).size).toBe(files.length);
   });
 
-  it('every product has 3 options with unique ids and authored results', () => {
+  it('every product has at least 3 options with unique ids and authored results', () => {
     for (const f of files) {
-      const raw = readFileSync(join(dir, `${f}.md`), 'utf8');
-      const { data } = matter(raw);
-      const parsed = Product.parse(data);
+      const parsed = load(f);
+      expect(parsed.configurator.options.length).toBeGreaterThanOrEqual(3);
       const optionIds = parsed.configurator.options.map((o) => o.id);
       expect(new Set(optionIds).size).toBe(optionIds.length);
       for (const o of parsed.configurator.options) {
@@ -63,20 +65,12 @@ describe('content validation', () => {
   });
 
   it('every related reference resolves and no product references itself', () => {
-    const byId = new Map<string, string>();
+    const ids = new Set(files);
     for (const f of files) {
-      const raw = readFileSync(join(dir, `${f}.md`), 'utf8');
-      const { data } = matter(raw);
-      const parsed = Product.parse(data);
-      byId.set(f, parsed.title);
-    }
-    for (const f of files) {
-      const raw = readFileSync(join(dir, `${f}.md`), 'utf8');
-      const { data } = matter(raw);
-      const parsed = Product.parse(data);
+      const parsed = load(f);
       expect(parsed.related).not.toContain(f);
       for (const rel of parsed.related) {
-        expect(byId.has(rel)).toBe(true);
+        expect(ids.has(rel)).toBe(true);
       }
     }
   });
@@ -84,9 +78,7 @@ describe('content validation', () => {
   it('every product has local SVG artwork and an imageAlt', () => {
     for (const f of files) {
       expect(existsSync(join(__dirname, '..', 'public', 'images', 'products', `${f}.svg`))).toBe(true);
-      const raw = readFileSync(join(dir, `${f}.md`), 'utf8');
-      const { data } = matter(raw);
-      expect(data.imageAlt.length).toBeGreaterThan(14);
+      expect(load(f).imageAlt.length).toBeGreaterThan(14);
     }
   });
 });

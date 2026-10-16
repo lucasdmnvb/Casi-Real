@@ -1,0 +1,241 @@
+---
+import { seoHead, jsonLd } from '@/components/seo-head';
+import { productCard } from '@/components/product-card';
+import Header from '@/components/header.astro';
+import Footer from '@/components/footer.astro';
+import { site } from '@/config/site';
+import { categoryBySlug } from '@/config/categories';
+import { loadProducts, relatedProducts, productPath, Product } from '@/lib/products';
+
+export async function getStaticPaths() {
+  const products = await loadProducts();
+  return products.map((p) => ({ params: { slug: p.id } }));
+}
+
+const products = await loadProducts();
+const id = Astro.params.slug!;
+const product = products.find((p) => p.id === id)!;
+
+const { data } = product;
+const sideEffects = Array.isArray(data.sideEffects) ? data.sideEffects : [];
+const idealFor = typeof data.idealFor === 'string' ? data.idealFor : '';
+const cat = categoryBySlug(data.category);
+const related = relatedProducts(products, product, 3);
+const { Content } = await product.render();
+
+const title = data.seoTitle;
+const description = data.seoDescription;
+const url = new URL(productPath(product.id), site.url).href;
+const image = new URL(data.image, site.url).href;
+
+const breadcrumbLd = {
+  '@context': 'https://schema.org',
+  '@type': 'BreadcrumbList',
+  itemListElement: [
+    { '@type': 'ListItem', position: 1, name: 'Inicio', item: new URL('/', site.url).href },
+    {
+      '@type': 'ListItem',
+      position: 2,
+      name: cat?.name ?? data.category,
+      item: new URL(`/categorias/${data.category}/`, site.url).href
+    },
+    { '@type': 'ListItem', position: 3, name: data.title, item: url }
+  ]
+};
+const webpageLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebPage',
+  name: data.title,
+  description: data.shortDescription,
+  url,
+  inLanguage: site.lang,
+  isPartOf: { '@type': 'WebSite', name: site.name, url: new URL('/', site.url).href },
+  about: { '@type': 'Thing', name: data.title, description: data.shortDescription }
+};
+---
+
+<html lang={site.lang}>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="icon" type="image/svg+xml" href={site.favicon} />
+    {seoHead({ title, description, url, image })}
+    {jsonLd(breadcrumbLd)}
+    {jsonLd(webpageLd)}
+    <style is:global>@import '/src/styles/global.css';</style>
+  </head>
+  <body>
+    <Header />
+    <main class="section">
+      <div class="container">
+        <nav class="breadcrumbs" aria-label="Ruta de navegación">
+          <a href="/">Inicio</a>
+          <svg aria-hidden="true"><path d="M4 8l4 4 4-4" /></svg>
+          <a href={`/categorias/${data.category}/`}>{cat?.name ?? data.category}</a>
+          <svg aria-hidden="true"><path d="M4 8l4 4 4-4" /></svg>
+          <span aria-current="page">{data.title}</span>
+        </nav>
+
+        <div class="product-hero">
+          <div class="product-media">
+            <span class="tag ficticio">Producto ficticio</span>
+            <img src={data.image} alt={data.imageAlt} width="640" height="640" loading="eager" decoding="async" fetchpriority="high" />
+          </div>
+          <div class="product-info">
+            <p class="product-eyebrow">{data.eyebrow}</p>
+            <h1>{data.title}</h1>
+            <p class="lead" style="margin:0;">{data.shortDescription}</p>
+            <p class="disclosure">Este invento no existe. No se vende, ni se fabrica, ni se envía.</p>
+            <p class="product-credits">{data.imaginaryCredits.toLocaleString('es-CL')} créditos imaginarios · {data.badge}</p>
+            <div class="product-actions">
+              <button class="btn" id="focus-config" type="button">Personalizar este invento</button>
+              <a
+                href={`/regalos-imposibles/?p=${encodeURIComponent(product.id)}&v=${encodeURIComponent(data.configurator.options[0].id)}`}
+                class="btn btn-outline"
+                data-gift-start={product.id}
+              >Regalar esta idea</a>
+            </div>
+          </div>
+        </div>
+
+        <section class="configurator" id="config-section" aria-labelledby="config-heading">
+          <h2 id="config-heading" style="font-size:1.4rem;">Personaliza tu {data.title}</h2>
+          <p class="config-prompt">{data.configurator.prompt}</p>
+          <div class="option-group" role="radiogroup" aria-label="Elige una versión">
+            {data.configurator.options.map((opt) => (
+              <label class="option-btn">
+                <input type="radio" name="config" value={opt.id} aria-label={opt.label} />
+                <span class="option-label">{opt.label}</span>
+              </label>
+            ))}
+          </div>
+          <button class="btn btn-sm" id="reveal-btn" type="button" disabled style="margin-top:1rem;">Ver mi resultado</button>
+          <div id="result" class="result-area" role="status" aria-live="polite" hidden></div>
+          <div class="product-actions" style="margin-top:1rem;">
+            <button class="btn btn-block btn-ghost" id="bag-btn" type="button" hidden>Agregar a mi bolsa imaginaria</button>
+            <a class="btn btn-block btn-ghost" id="gift-btn" hidden>Regalar esta idea</a>
+          </div>
+          <script type="application/json" id="config-options" set:html={JSON.stringify(data.configurator.options)}></script>
+          <div id="product-meta" data-id={product.id} data-title={data.title} data-category={data.category} data-image={data.image} hidden></div>
+        </section>
+
+        <div class="product-content" style="margin-top:2.5rem;">
+          <Content />
+        </div>
+
+        <section style="margin-top:2.5rem;">
+          <h2 style="font-size:1.4rem;">Características absurdamente útiles</h2>
+          <ul class="feature-list">
+            {data.benefits.map((b) => <li>{b}</li>)}
+          </ul>
+        </section>
+
+        <section style="margin-top:2.5rem;">
+          <h2 style="font-size:1.4rem;">Especificaciones (ficticias)</h2>
+          <table class="specs-table">
+            <tbody>
+              {data.specs.map((s) => (
+                <tr><th scope="row">{s.label}</th><td>{s.value}</td></tr>
+              ))}
+              {idealFor && <tr><th scope="row">Ideal para</th><td>{idealFor}</td></tr>}
+            </tbody>
+          </table>
+        </section>
+
+        {sideEffects.length > 0 && (
+          <section style="margin-top:2.5rem;">
+            <h2 style="font-size:1.4rem;">Posibles efectos secundarios</h2>
+            <p class="muted">Advertencias nacidas de la física imaginaria. Ninguna ocurre de verdad.</p>
+            <ul class="side-effects">
+              {sideEffects.map((s) => <li>{s}</li>)}
+            </ul>
+          </section>
+        )}
+
+        <section style="margin-top:2.5rem;">
+          <h2 style="font-size:1.4rem;">Preguntas frecuentes</h2>
+          {data.faq.map((f) => (
+            <details class="faq">
+              <summary>{f.q}</summary>
+              <p>{f.a}</p>
+            </details>
+          ))}
+        </section>
+
+        <section style="margin-top:2.5rem;" data-source="related">
+          <div class="section-head">
+            <h2 style="font-size:1.4rem;">También podrías imaginar</h2>
+            <a href="/productos/">Ver todo el catálogo</a>
+          </div>
+          <div class="related-grid">
+            {related.map((r) => productCard({ product: r, source: 'related' }))}
+          </div>
+        </section>
+
+        <p style="margin-top:2rem; font-size:0.86rem; color:var(--muted); border-top:1px solid var(--line); padding-top:1rem;">
+          {data.title} es un producto de ficción de CASI REAL. {data.shortDescription} La ilustración es arte conceptual, no un prototipo funcional.
+        </p>
+      </div>
+    </main>
+    <Footer />
+    <script src="/scripts/bag-ui.js" defer></script>
+    <script>
+      import { addItem, loadBag } from '@/lib/cart';
+      import { track } from '@/lib/analytics';
+
+      const config = document.getElementById('config-section')!;
+      const options = JSON.parse(document.getElementById('config-options')!.textContent || '[]') as { id: string; label: string; result: string }[];
+      const group = config.querySelector('.option-group')!;
+      const reveal = document.getElementById('reveal-btn') as HTMLButtonElement;
+      const result = document.getElementById('result')!;
+      const bagBtn = document.getElementById('bag-btn') as HTMLButtonElement;
+      const giftBtn = document.getElementById('gift-btn') as HTMLAnchorElement;
+      const meta = document.getElementById('product-meta') as HTMLElement;
+      const productId = meta.dataset.id!;
+      const productTitle = meta.dataset.title!;
+      const productCategory = meta.dataset.category!;
+      let selected: string | null = null;
+
+      track('product_view', { product: productId, category: productCategory });
+
+      function esc(t: string) { const d = document.createElement('div'); d.textContent = t; return d.innerHTML; }
+
+      group.addEventListener('change', (e) => {
+        const target = e.target as HTMLInputElement;
+        if (target.tagName !== 'INPUT') return;
+        selected = target.value;
+        group.querySelectorAll('.option-btn').forEach((btn) => btn.classList.toggle('selected', btn.querySelector('input') === target));
+        reveal.disabled = false;
+        result.hidden = true;
+        bagBtn.hidden = true;
+        giftBtn.hidden = true;
+      });
+
+      reveal.addEventListener('click', () => {
+        const opt = options.find((o) => o.id === selected);
+        if (!opt) return;
+        result.hidden = false;
+        result.innerHTML = `<span class="result-text">${esc(opt.result)}</span>`;
+        bagBtn.hidden = false;
+        giftBtn.hidden = false;
+        giftBtn.href = '/regalos-imposibles/?p=' + encodeURIComponent(productId) + '&v=' + encodeURIComponent(selected!);
+        track('select_variant', { product: productId, variant: selected! });
+      });
+
+      bagBtn.addEventListener('click', () => {
+        if (!selected) return;
+        addItem(loadBag(), productId, selected);
+        const prev = bagBtn.textContent;
+        bagBtn.textContent = '¡Listo! Tu invento ya vive en la bolsa.';
+        bagBtn.disabled = true;
+        track('bag_add', { product: productId, category: productCategory, variant: selected });
+        setTimeout(() => { bagBtn.textContent = prev; bagBtn.disabled = false; }, 2200);
+      });
+
+      document.getElementById('focus-config')?.addEventListener('click', () => {
+        config.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        document.getElementById('config-heading')?.focus();
+      });
+    </script>
+  </body>
+</html>

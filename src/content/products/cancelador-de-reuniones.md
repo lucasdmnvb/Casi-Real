@@ -14,6 +14,10 @@ benefits:
   - Filtra «reuniones de seguimiento»
   - Transforma agendas en aire fresco
   - Compatible con el viernes después de almuerzo
+sideEffects:
+  - Podría cancelar una reunión que sí era importante
+  - Los organizadores de reuniones podrían no perdonarte
+idealFor: Quien tiene más reuniones que horas en el día
 specs:
   - label: Cancelación
     value: 100 % imaginaria

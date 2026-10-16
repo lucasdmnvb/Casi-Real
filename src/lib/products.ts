@@ -5,15 +5,22 @@ import { categories, categoryBySlug } from '@/config/categories';
 
 export type Product = Omit<CollectionEntry<'products'>, 'id'> & { id: string };
 
-export async function loadProducts(): Promise<Product[]> {
-  return (await getCollection('products')).map((p) => ({ ...p, id: p.id.replace(/\.md$/, '') }));
+export function productPath(id: string): string {
+  return `/productos/${encodeURIComponent(id)}/`;
 }
 
-export function getProductById(
-  products: Product[],
-  id: string
-): Product | undefined {
+export async function loadProducts(): Promise<Product[]> {
+  return (await getCollection('products'))
+    .map((p) => ({ ...p, id: p.id.replace(/\.md$/, '') }))
+    .sort((a, b) => a.data.title.localeCompare(b.data.title, 'es'));
+}
+
+export function getProductById(products: Product[], id: string): Product | undefined {
   return products.find((p) => p.id === id);
+}
+
+export function productsByCategory(products: Product[], slug: string): Product[] {
+  return products.filter((p) => p.data.category === slug);
 }
 
 export function validateRelatedIds(products: Product[]): string[] {
@@ -30,6 +37,26 @@ export function validateRelatedIds(products: Product[]): string[] {
     }
   }
   return problems;
+}
+
+/**
+ * Related products priority:
+ * 1) explicit curated relationships, 2) shared category, 3) any other published product.
+ * Never includes the current product and never duplicates.
+ */
+export function relatedProducts(products: Product[], current: Product, limit = 3): Product[] {
+  const out: Product[] = [];
+  const seen = new Set<string>([current.id]);
+  const push = (p: Product | undefined) => {
+    if (!p || seen.has(p.id)) return;
+    seen.add(p.id);
+    out.push(p);
+  };
+  const byId = new Map(products.map((p) => [p.id, p]));
+  for (const id of current.data.related) push(byId.get(id));
+  for (const p of products) if (p.data.category === current.data.category) push(p);
+  for (const p of products) push(p);
+  return out.slice(0, limit);
 }
 
 export function optionFor(product: Product, variantId: string) {

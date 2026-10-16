@@ -1,59 +1,126 @@
 ---
-import { seoHead } from '@/components/seo-head';
+import { seoHead, jsonLd } from '@/components/seo-head';
 import { productCard } from '@/components/product-card';
 import Header from '@/components/header.astro';
 import Footer from '@/components/footer.astro';
 import { site } from '@/config/site';
-import { loadProducts } from '@/lib/products';
-import { categories, categoryBySlug } from '@/config/categories';
+import { loadProducts, productPath } from '@/lib/products';
+import { categories } from '@/config/categories';
 
 const products = await loadProducts();
 const featured = products.filter((p) => p.data.featured);
-const catLinks = categories.map((c) => ({ slug: c.slug, name: c.name, heading: c.heading, accent: c.accent }));
+const hero = featured[0] ?? products[0];
+const grid = featured.slice(featured[0] === hero ? 1 : 0).slice(0, 3);
+const others = products.filter((p) => !featured.includes(p)).slice(0, 6);
+const slugs = products.map((p) => p.id);
 
-const title = `${site.name} | Tienda ficticia de inventos imposibles`;
-const description = site.shortDescription;
+const title = `${site.name} — Inventos imposibles para problemas reales`;
+const description =
+  'Tienda ficticia de inventos imposibles: clones, pausadores de tiempo y regalos que desafían la realidad. Personaliza, arma tu pedido imaginario y comparte. Nada se vende de verdad.';
 const url = new URL('/', site.url).href;
+
+const websiteLd = {
+  '@context': 'https://schema.org',
+  '@type': 'WebSite',
+  name: site.name,
+  url: new URL('/', site.url).href,
+  description: site.shortDescription,
+  inLanguage: site.lang
+};
 ---
 
-<html lang="es">
+<html lang={site.lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <link rel="icon" type="image/svg+xml" href={site.favicon} />
     {seoHead({ title, description, url, image: site.ogImage })}
+    {jsonLd(websiteLd)}
     <style is:global>@import '/src/styles/global.css';</style>
   </head>
   <body>
-    <Header />
-    <section class="top-strip">
+    <div class="top-strip">
       <div class="container">
         <span class="fiction-chip">
-          Tienda ficticia · <span style="text-decoration:underline; text-decoration-thickness:2px;">Nada aquí se vende de verdad</span> · <a href="/como-funciona/">¿Cómo funciona?</a>
+          <span class="fiction-dot" aria-hidden="true"></span>
+          Tienda ficticia · nada aquí se vende de verdad ·
+          <a href="/como-funciona/">¿Cómo funciona?</a>
         </span>
       </div>
-    </section>
+    </div>
+    <Header />
 
-    <section class="section" style="padding-top:0;">
+    <section class="hero">
       <div class="container">
-        <h1 style="font-family:var(--serif); margin:0 0 0.5rem;">Todo lo que nunca existirá. Y aun así lo quieres.</h1>
-        <p style="font-size:1.1rem; color:var(--muted); max-width:64ch; margin:0 0 1.6rem;">
-          Clones para sobrevivir al lunes, controles para pausar el tiempo y otros inventos que ninguna fábrica se atrevería a admitir. Esta tienda es completamente ficticia.
-        </p>
-        <div style="display:flex; flex-direction:column; gap:0.8rem;">
-          <a href="/productos/" class="btn">Explorar inventos</a>
-          <a href="/regalos-imposibles/" class="btn btn-outline">Enviar un regalo imposible</a>
+        <div class="hero-grid">
+          <div class="hero-copy">
+            <p class="eyebrow">Inventos que la física no permite</p>
+            <h1>Problemas reales.<br /><em>Soluciones que desafían la realidad.</em></h1>
+            <p class="lead">
+              Desde un borrador de conversaciones vergonzosas hasta un clon que trabaja por ti.
+              Bienvenido a la tienda de lo imposible.
+            </p>
+            <div class="hero-cta">
+              <a href="/productos/" class="btn">Descubrir inventos</a>
+              <a href="/regalos-imposibles/" class="btn btn-outline">Enviar un regalo imposible</a>
+            </div>
+          </div>
+
+          {hero && (
+            <article class="feature-panel">
+              <a class="feature-media" href={productPath(hero.id)} data-card-link data-product={hero.id} data-category={hero.data.category} aria-label={hero.data.title}>
+                <span class="tag ficticio">Ficticio</span>
+                <img src={hero.data.image} alt={hero.data.imageAlt} width="640" height="640" loading="eager" decoding="async" fetchpriority="high" />
+              </a>
+              <p class="feature-eyebrow">{hero.data.eyebrow}</p>
+              <h2><a href={productPath(hero.id)} data-card-link data-product={hero.id} data-category={hero.data.category} style="color:inherit; text-decoration:none;">{hero.data.title}</a></h2>
+              <p class="feature-hook">{hero.data.hook}</p>
+              <div class="feature-foot">
+                <span class="feature-credits">{hero.data.imaginaryCredits.toLocaleString('es-CL')} créditos</span>
+                <a href={productPath(hero.id)} class="btn btn-sm" data-card-link data-product={hero.id} data-category={hero.data.category}>Ver invento</a>
+              </div>
+            </article>
+          )}
+        </div>
+
+        <div class="stat-row">
+          <div class="stat"><b>{products.length}</b><span>inventos ficticios</span></div>
+          <div class="stat"><b>{categories.length}</b><span>categorías</span></div>
+          <div class="stat"><b>0</b><span>productos reales</span></div>
+          <div class="stat"><b>∞</b><span>créditos imaginarios</span></div>
         </div>
       </div>
     </section>
 
-    <section class="section">
+    {grid.length > 0 && (
+      <section class="section" data-source="home-featured">
+        <div class="container">
+          <div class="section-head">
+            <div>
+              <p class="eyebrow">Lo más pedido (en la imaginación)</p>
+              <h2>Inventos que dan ganas de tener</h2>
+            </div>
+            <a href="/productos/">Ver el catálogo completo</a>
+          </div>
+          <div class="product-grid">
+            {grid.map((p) => productCard({ product: p, source: 'home-featured' }))}
+          </div>
+        </div>
+      </section>
+    )}
+
+    <section class="section" data-source="home-categories">
       <div class="container">
-        <h2 style="text-align:center; margin-bottom:1rem;">Categorías</h2>
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Explora por problema</p>
+            <h2>Categorías</h2>
+          </div>
+        </div>
         <div class="category-products">
-          {catLinks.map((c) => (
-            <a href={`/categorias/${c.slug}/`} class="category-link-card" style="border-top:4px solid ${c.accent};">
-              <p style="margin:0 0 0.4rem; font-size:1.05rem; font-weight:800;">{c.name}</p>
+          {categories.map((c) => (
+            <a href={`/categorias/${c.slug}/`} class="category-link-card" style={`border-left-color: var(--cat-${c.slug});`}>
+              <p class="category-name">{c.name}</p>
               <p class="category-note">{c.heading}</p>
             </a>
           ))}
@@ -61,50 +128,71 @@ const url = new URL('/', site.url).href;
       </div>
     </section>
 
-    <section class="section">
-      <div class="container">
-        <h2 style="text-align:center; margin-bottom:1.5rem;">Destacados</h2>
-        <div class="product-grid">
-          {featured.map((p) => productCard({ product: p }))}
-          {featured.length === 0 && (
-            <p style="grid-column:1/-1; text-align:center; color:var(--muted);">Nada destacado todavía.</p>
-          )}
+    <section class="section section-dark" data-source="home-gift">
+      <div class="container" style="text-align:center; max-width:760px;">
+        <p class="eyebrow">Regalos imposibles</p>
+        <h2>Regala algo que no existe. La sonrisa sí.</h2>
+        <p class="lead" style="margin:0 auto 1.6rem;">
+          Elige un invento imposible, escríbele una dedicatoria a alguien y comparte el enlace.
+          Sin cuentas, sin pagos, sin envíos: solo una excusa (casi real) para hacer reír.
+        </p>
+        <div class="hero-cta" style="justify-content:center;">
+          <a href="/regalos-imposibles/" class="btn">Crear un regalo imposible</a>
+          <a href="/ideas/regalos-imposibles/" class="btn btn-ghost">Ver ideas de regalo</a>
         </div>
-        <p style="text-align:center; margin-top:1rem;"><a href="/productos/">Ver los ocho inventos</a></p>
       </div>
     </section>
 
-    <section class="section" style="background:var(--surface-alt);">
+    <section class="section" data-source="home-discovery">
       <div class="container">
-        <h2 style="text-align:center; margin-bottom:1.5rem;">Cómo funciona</h2>
-        <div style="display:flex; flex-direction:column; gap:1.2rem; align-items:center; text-align:center;">
-          <div style="font-size:2rem; font-weight:800;">Imagina</div>
-          <div style="font-size:2rem; font-weight:800;">Personaliza</div>
-          <div style="font-size:2rem; font-weight:800;">Comparte</div>
+        <div class="section-head">
+          <div>
+            <p class="eyebrow">Descubrimiento aleatorio</p>
+            <h2>¿No sabes qué necesitas (tampoco existe)?</h2>
+          </div>
+          <button type="button" class="btn random-btn" id="random-btn" data-slugs={JSON.stringify(slugs)}>Sorpréndeme</button>
         </div>
-        <p style="max-width:42ch; margin:1rem auto 0; color:var(--muted); font-size:0.98rem;">
-          Explora el catálogo, elige una versión de cualquier invento, agrégalo a tu bolsa imaginaria o envíalo como regalo. No hay pago, ni envío, ni producto físico.
+        <div class="product-grid">
+          {others.map((p) => productCard({ product: p, source: 'home-discovery' }))}
+        </div>
+      </div>
+    </section>
+
+    <section class="section" style="background:var(--surface);" data-source="home-how">
+      <div class="container">
+        <div class="section-head"><div><p class="eyebrow">Sin trucos</p><h2>Cómo funciona</h2></div></div>
+        <div class="category-products">
+          <div class="category-link-card" style="border-left-color: var(--accent-strong);">
+            <p class="category-name">1. Imagina</p>
+            <p class="category-note">Explora inventos imposibles para problemas muy reales.</p>
+          </div>
+          <div class="category-link-card" style="border-left-color: var(--accent-strong);">
+            <p class="category-name">2. Personaliza</p>
+            <p class="category-note">Elige una versión de cualquier invento y descubre su resultado absurdo.</p>
+          </div>
+          <div class="category-link-card" style="border-left-color: var(--accent-strong);">
+            <p class="category-name">3. Comparte</p>
+            <p class="category-note">Guárdalo en tu bolsa imaginaria o envíaselo a alguien como regalo.</p>
+          </div>
+        </div>
+        <p class="muted" style="max-width:56ch; margin-top:1.2rem;">
+          No hay pago, ni envío, ni producto físico. CASI REAL es una tienda de ficción: todo se queda en tu imaginación.
+          <a href="/como-funciona/">Conoce el detalle</a>.
         </p>
       </div>
     </section>
 
-    <section class="section">
+    <section class="section" data-source="home-editorial">
       <div class="container">
-        <h2 style="text-align:center; margin-bottom:1.5rem;">Leer más</h2>
-        <div style="display:flex; flex-direction:column; gap:1.2rem;">
-          <a href="/ideas/inventos-imposibles/" style="text-decoration:none; border:1px solid var(--line); border-radius:var(--radius-lg); padding:1.4rem; display:flex; gap:1rem; align-items:flex-start;">
-            <div style="flex-shrink:0; font-size:2rem;">📖</div>
-            <div>
-              <p style="margin:0 0 0.3rem; font-weight:800; font-size:1.1rem;">Inventos imposibles</p>
-              <p style="margin:0; color:var(--muted); font-size:0.95rem;">Una colección de ideas para problemas demasiado reales.</p>
-            </div>
+        <div class="section-head"><div><p class="eyebrow">Editorial</p><h2>Leer más</h2></div></div>
+        <div class="category-products">
+          <a href="/ideas/inventos-imposibles/" class="category-link-card" style="border-left-color: var(--accent-strong);">
+            <p class="category-name">Inventos imposibles</p>
+            <p class="category-note">Una colección de ideas para problemas demasiado reales.</p>
           </a>
-          <a href="/ideas/regalos-imposibles/" style="text-decoration:none; border:1px solid var(--line); border-radius:var(--radius-lg); padding:1.4rem; display:flex; gap:1rem; align-items:flex-start;">
-            <div style="flex-shrink:0; font-size:2rem;">🎁</div>
-            <div>
-              <p style="margin:0 0 0.3rem; font-weight:800; font-size:1.1rem;">Regalos imposibles</p>
-              <p style="margin:0; color:var(--muted); font-size:0.95rem;">Ideas ficticias para compartir sin gastar nada.</p>
-            </div>
+          <a href="/ideas/regalos-imposibles/" class="category-link-card" style="border-left-color: var(--accent-strong);">
+            <p class="category-name">Regalos imposibles</p>
+            <p class="category-note">Ideas ficticias para compartir sin gastar nada.</p>
           </a>
         </div>
       </div>
@@ -112,5 +200,17 @@ const url = new URL('/', site.url).href;
 
     <Footer />
     <script src="/scripts/bag-ui.js" defer></script>
+    <script>
+      import { track } from '@/lib/analytics';
+      const randomBtn = document.getElementById('random-btn') as HTMLButtonElement | null;
+      randomBtn?.addEventListener('click', () => {
+        let slugs: string[] = [];
+        try { slugs = JSON.parse(randomBtn.dataset.slugs || '[]'); } catch {}
+        if (!slugs.length) return;
+        const pick = slugs[Math.floor(Math.random() * slugs.length)];
+        track('random_product_click', { product: pick });
+        window.location.href = `/productos/${encodeURIComponent(pick)}/`;
+      });
+    </script>
   </body>
 </html>

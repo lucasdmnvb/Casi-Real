@@ -14,6 +14,10 @@ benefits:
   - Delegación literal de los lunes
   - Compatible con agendas que dan miedo
   - No requiere compartir tu contraseña
+sideEffects:
+  - Puede desarrollar mejores relaciones laborales que tú
+  - Podría pedirte vacaciones antes que tú
+idealFor: Profesionales con agendas que dan miedo
 specs:
   - label: Motor
     value: Identidad paralela v2.0

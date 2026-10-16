@@ -14,6 +14,10 @@ benefits:
   - Restaura domingos imaginarios
   - Modo siesta de emergencia
   - Funciona incluso después de una maratón de series
+sideEffects:
+  - Podrías acumular tanto descanso que no sepas qué hacer despierto
+  - La siesta perfecta podría durar más de lo previsto
+idealFor: Quien debe horas de sueño a la semana
 specs:
   - label: Capacidad
     value: 7 horas metafóricas

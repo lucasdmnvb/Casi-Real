@@ -27,7 +27,7 @@ const description = invalid
 const url = new URL('/regalo/', site.url).href;
 ---
 
-<html lang="es">
+<html lang={site.lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -54,6 +54,7 @@ const url = new URL('/regalo/', site.url).href;
               <p style="color:var(--muted); margin:0 0 0.8rem;">{variant!.result}</p>
               {gift!.note && <p style="font-style:italic; margin:0 0 1rem;">«{gift!.note}»</p>}
               <p style="margin:0 0 0.4rem; font-size:0.85rem; color:var(--ink);">Para: {gift!.to || '—'}</p>
+              {gift!.from && <p style="margin:0 0 0.4rem; font-size:0.85rem; color:var(--muted);">De parte de: {gift!.from}</p>}
               <span style="font-size:0.75rem; font-weight:800; letter-spacing:1px; text-transform:uppercase; color:var(--fiction-fg); border-top:1px dashed #F3C9C5; padding-top:0.6rem; display:block;">Regalo imaginario / Sin valor comercial</span>
             </div>
             <p style="margin-top:1.2rem;"><a href={`/productos/${product.data.id}/`} class="btn btn-outline">Ver el producto original</a></p>

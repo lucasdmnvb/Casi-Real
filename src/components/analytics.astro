@@ -1,0 +1,24 @@
+---
+import { initAnalytics } from '@/lib/analytics';
+// Delegated, privacy-conscious tracking of card clicks across the whole site.
+initAnalytics();
+---
+<script>
+  import { track } from '@/lib/analytics';
+
+  document.addEventListener(
+    'click',
+    (e) => {
+      const target = e.target as HTMLElement | null;
+      const link = target?.closest('[data-card-link]');
+      if (!link) return;
+      const el = link as HTMLElement;
+      track('product_card_click', {
+        product: el.dataset.product ?? '',
+        category: el.dataset.category ?? '',
+        source: el.closest('[data-source]')?.getAttribute('data-source') ?? 'grid'
+      });
+    },
+    { capture: true }
+  );
+</script>

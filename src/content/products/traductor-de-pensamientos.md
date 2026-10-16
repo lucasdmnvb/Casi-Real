@@ -14,6 +14,10 @@ benefits:
   - Modo conversación incómoda
   - Traducción directa de indirectas
   - Frases breves para personas que dan muchas vueltas
+sideEffects:
+  - Escucharás cosas que quizá preferías intuir sin saber
+  - Podría arruinar el arte de adivinar
+idealFor: Quien dedica más tiempo a imaginar que a preguntar
 specs:
   - label: Idiomas
     value: Pensamiento → conversación

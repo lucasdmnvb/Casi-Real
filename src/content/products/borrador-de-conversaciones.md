@@ -14,6 +14,10 @@ benefits:
   - Deshace audios demasiado largos
   - Reduce la vergüenza metafórica
   - Incluye modo «no era para ti»
+sideEffects:
+  - Podrías borrar algo que en realidad querías decir
+  - El botón de deshacer no funciona fuera de la ficción
+idealFor: Personas que envían audios de los que luego se arrepienten
 specs:
   - label: Retroceso
     value: Hasta una vergüenza completa

@@ -9,7 +9,7 @@ const description = 'Este invento todavía no existe. Ni siquiera aquí. Vuelve 
 const url = new URL('/404/', site.url).href;
 ---
 
-<html lang="es">
+<html lang={site.lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -23,7 +23,7 @@ const url = new URL('/404/', site.url).href;
       <div class="container" style="text-align:center;">
         <h1>Este invento todavía no existe. Ni siquiera aquí.</h1>
         <p style="font-size:1.1rem; color:var(--muted); max-width:42ch; margin:0.8rem auto 1.6rem;">
-          La ruta que buscas no está en nuestro catálogo. Vuelve a lo improbable y explora los ocho inventos.
+          La ruta que buscas no está en nuestro catálogo. Vuelve a lo improbable y explora los veinte inventos.
         </p>
         <a href="/productos/" class="btn">Volver a lo improbable</a>
         <a href="/" class="btn btn-outline" style="margin-left:0.6rem;">Inicio</a>

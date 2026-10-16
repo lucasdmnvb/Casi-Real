@@ -14,7 +14,7 @@ const url = new URL('/pedido-imaginario/', site.url).href;
 const code = receipt ? 'CR-' + Math.floor(100000 + Math.random() * 900000) : null;
 ---
 
-<html lang="es">
+<html lang={site.lang}>
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
